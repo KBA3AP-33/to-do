@@ -1,73 +1,82 @@
-# React + TypeScript + Vite
+# 📋 Todo Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Современное веб-приложение для управления задачами с поддержкой проектов, авторизацией и аналитикой. Построено на React с TypeScript и современным стеком технологий.
 
-Currently, two official plugins are available:
+## ✨ Возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ✅ **Аутентификация и регистрация** (JWT)
+- ✅ **Управление проектами** (CRUD операции)
+- ✅ **Управление задачами** (CRUD операции внутри проектов)
+- ✅ **Профиль пользователя** с настройками
+- ✅ **Статистика по задачам** (выполненные, в процессе, просроченные)
+- ✅ **Drag & Drop** для сортировки задач (В разработке)
+- ✅ **Темная/светлая тема** (поддержка Ant Design)
 
-## React Compiler
+## 🛠 Технологии
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Технология | Назначение | Версия |
+|------------|------------|---------|
+| **React** | UI библиотека | 19.2.0 |
+| **TypeScript** | Типизация | ~5.9.3 |
+| **Vite** | Сборка | ^7.2.4 |
+| **Redux Toolkit** | State management | ^2.11.0 |
+| **Ant Design** | UI компоненты | ^6.0.1 |
+| **React Router** | Навигация | ^7.10.1 |
+| **TailwindCSS** | Утилиты CSS | ^4.1.17 |
+| **Jest** | Тестирование | ^30.2.0 |
+| **ESLint/Prettier** | Качество кода | - |
 
-## Expanding the ESLint configuration
+## 🚀 Быстрый старт
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Предварительные требования
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 18+ или 20+
+- npm, yarn или pnpm
+- [Бэкенд сервер](https://github.com/KBA3AP-33/to-do-backend) (должен быть запущен отдельно)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Установка и запуск
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. **Клонируйте репозиторий:**
+```bash
+git clone https://github.com/KBA3AP-33/to-do.git
+cd todo
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. **Установите зависимости:**
+```bash
+npm install
+# или
+yarn
+# или
+pnpm install
+```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. **Запустите сервер для разработки:**
+```bash
+npm run dev
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+4. **Сборка для production:**
+```bash
+npm run build         # Сборка для production
+npm run preview       # для предпросмотра сборки
+```
+
+5. **Тестирование:**
+```bash
+npm run test          # Запуск тестов
+npm run test:dir      # Запуск тестов по директории
+```
+
+6. **Docker:**
+```bash
+npm run dev:docker          # Сборка и запуск в Docker
+npm run dev:docker:compose  # Запуск через Docker Compose
+```
+
+7. **SSR:**
+```bash
+npm run build:ssr     # Сборка SSR версии
+npm run preview:ssr   # Предпросмотр SSR версии
+npm run start:ssr     # Запуск SSR сервера
 ```
