@@ -38,7 +38,7 @@
 
 1. **Клонируйте репозиторий:**
 ```bash
-git clone https://github.com/KBA3AP-33/to-do-backend.git
+git clone https://github.com/KBA3AP-33/to-do.git
 cd todo
 ```
 
