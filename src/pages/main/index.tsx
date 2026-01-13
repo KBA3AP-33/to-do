@@ -1,4 +1,5 @@
 import { HomeStep } from '@src/components/home-step';
+import { useThemeToken } from '@src/hooks/use-theme-token';
 import { HomeLayout } from '@src/layouts/home';
 import { ROUTES } from '@src/routes';
 import type { RootState } from '@src/store';
@@ -7,6 +8,8 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 export const MainPage = () => {
+  const { token } = useThemeToken();
+
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -15,9 +18,9 @@ export const MainPage = () => {
       <main className="h-full pt-6 flex flex-col justify-start items-center">
         <section className="py-8">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-5xl font-bold mb-6 text-gray-900">
+            <h1 className="text-5xl font-bold mb-6">
               Управляйте своими задачами
-              <span className="text-[#ea4b3a]"> эффективно</span>
+              <span style={{ color: token?.colorCustomPrimary }}> эффективно</span>
             </h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               TaskMaster помогает организовать ваши задачи, проекты и цели в одном месте. Создавайте, отслеживайте и

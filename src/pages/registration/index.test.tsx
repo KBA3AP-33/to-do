@@ -33,6 +33,13 @@ jest.mock('@src/store/auth/slice', () => ({
   },
 }));
 
+// jest.mock('./ThemeContext', () => ({
+//   useTheme: () => ({
+//     theme: 'light',
+//     toggleTheme: jest.fn(),
+//   }),
+// }));
+
 describe('Рендер', () => {
   test('Рендер формы', () => {
     render(<RegistrationPage />);

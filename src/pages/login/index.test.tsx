@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { LoginPage } from '.';
 import userEvent from '@testing-library/user-event';
 
@@ -32,6 +32,13 @@ jest.mock('@src/store/auth/slice', () => ({
     };
   },
 }));
+
+// jest.mock('./ThemeContext', () => ({
+//   useTheme: () => ({
+//     theme: 'light',
+//     toggleTheme: jest.fn(),
+//   }),
+// }));
 
 describe('Рендер', () => {
   test('Рендер формы', () => {
@@ -71,7 +78,7 @@ describe('Форма', () => {
 
     render(<LoginPage />);
 
-    const emailInput = screen.getByPlaceholderText('Введите email');
+    const emailInput = screen.getByLabelText('Email');
     await user.type(emailInput, 'test@m.ru');
 
     const passwordInput = screen.getByPlaceholderText('Введите пароль');

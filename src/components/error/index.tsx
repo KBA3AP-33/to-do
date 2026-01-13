@@ -1,6 +1,6 @@
 import { HomeOutlined, RollbackOutlined } from '@ant-design/icons';
 import { AuthLayout } from '@src/layouts/auth';
-import { Button } from 'antd';
+import { Button, Flex, Typography } from 'antd';
 import type { FC } from 'react';
 
 interface Props {
@@ -13,6 +13,8 @@ interface Props {
   backButtonIcon?: React.ReactNode;
 }
 
+const { Title, Text } = Typography;
+
 export const Error: FC<Props> = ({
   title,
   subTitle,
@@ -24,13 +26,13 @@ export const Error: FC<Props> = ({
 }) => {
   return (
     <AuthLayout>
-      <div className="flex flex-col items-center justify-center">
-        <div className="flex flex-col items-center justify-center gap-4 mb-8">
-          <h1 className="text-7xl font-bold text-gray-800 tracking-tight">{title}</h1>
-          <p className="text-3xl">{subTitle}</p>
-        </div>
+      <Flex vertical justify="center" align="center">
+        <Flex vertical justify="center" align="center" gap={16} className="!mb-8">
+          <Title className="!text-7xl !font-bold !tracking-tight">{title}</Title>
+          <Text className="!text-3xl">{subTitle}</Text>
+        </Flex>
 
-        <div className="flex gap-4 items-center">
+        <Flex align="center" gap={16}>
           <Button
             variant="solid"
             color="primary"
@@ -49,8 +51,8 @@ export const Error: FC<Props> = ({
           >
             {backButtonText}
           </Button>
-        </div>
-      </div>
+        </Flex>
+      </Flex>
     </AuthLayout>
   );
 };

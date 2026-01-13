@@ -7,3 +7,24 @@
 label {
   font-weight: 700;
 }
+
+:root {
+  --color-custom-primary: #ea4b3a;
+  --background-custom-primary: radial-gradient(circle, #fef4f4, #ffe2e2, #fce2e2);
+  --color-custom-black: #000000;
+
+  --color-custom-gray: #7f8c8d;
+}
+
+[data-theme='light'] {
+  --color-custom-primary: #ea4b3a;
+  --background-custom-primary: radial-gradient(circle, #fef4f4, #ffe2e2, #fce2e2);
+  --color-custom-black: #000000;
+}
+
+[data-theme='dark'] {
+  --color-custom-primary: #f97316;
+  --background-custom-primary: radial-gradient(circle, #161311, #1c1917, #292524);
+  --color-custom-black: #ffffff;
+}
+

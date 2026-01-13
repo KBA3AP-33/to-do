@@ -1,4 +1,4 @@
-import { ConfigProvider, Empty, List } from 'antd';
+import { ConfigProvider, Empty, Flex, List } from 'antd';
 import { TaskStatus, type Task } from '@src/types';
 import { priorities } from '@src/consts';
 import type { FC } from 'react';
@@ -6,15 +6,16 @@ import { ProjectItemListItem } from '@src/components/project-item-list-item';
 
 interface Props {
   items?: Task[];
-  onEdit: (id: string) => void;
-  onDelete: (id: string) => void;
-  onUpdateStatus: (value: { id: string; status: TaskStatus }) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onDuplicate?: (id: Task) => void;
+  onUpdateStatus?: (value: { id: string; status: TaskStatus }) => void;
 }
 
-export const ProjectItemList: FC<Props> = ({ items = [], onEdit, onDelete, onUpdateStatus }) => {
+export const ProjectItemList: FC<Props> = ({ items = [], onEdit, onDelete, onUpdateStatus, onDuplicate }) => {
   return (
-    <div className={`flex flex-col gap-4 flex-1 ${items?.length ? 'justify-start' : 'justify-center'}`}>
-      <ConfigProvider renderEmpty={() => <Empty description={'Нет задач'} />}>
+    <Flex vertical gap={16} justify={items?.length ? 'flex-start' : 'center'} className="flex-1">
+      <ConfigProvider renderEmpty={() => <Empty description="Нет задач" />}>
         <List
           dataSource={items}
           renderItem={item => {
@@ -28,11 +29,12 @@ export const ProjectItemList: FC<Props> = ({ items = [], onEdit, onDelete, onUpd
                 onDelete={onDelete}
                 onUpdateStatus={onUpdateStatus}
                 currentColor={currentColor}
+                onDuplicate={onDuplicate}
               />
             );
           }}
         />
       </ConfigProvider>
-    </div>
+    </Flex>
   );
 };

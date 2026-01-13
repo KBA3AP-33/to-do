@@ -3,17 +3,17 @@ import { ROUTES } from '@src/routes';
 import type { AppDispatch, RootState } from '@src/store';
 import { register as registerApi } from '@src/store/auth/slice';
 import { validator } from '@src/utils/validator';
-import { Button, Card, Form, Input, Typography } from 'antd';
+import { Button, Card, Flex, Form, Input, Typography } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-
-const { Title } = Typography;
 
 interface RegistrationValues {
   email: string;
   password: string;
   passwordConfirm: string;
 }
+
+const { Title, Text } = Typography;
 
 export const RegistrationPage = () => {
   const [form] = Form.useForm();
@@ -76,15 +76,12 @@ export const RegistrationPage = () => {
           </Form.Item>
 
           <div className="text-center">
-            <p className="mt-4 text-gray-600">
+            <Text className="!mt-4 !text-gray-600">
               Уже есть аккаунт?{' '}
-              <Link
-                to={ROUTES.login}
-                className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
-              >
+              <Link to={ROUTES.login} className="font-medium transition-colors duration-200">
                 Войти
               </Link>
-            </p>
+            </Text>
           </div>
         </Form>
       </Card>

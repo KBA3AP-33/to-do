@@ -2,6 +2,7 @@ import { Tokens } from '@src/utils/tokens';
 import type { AxiosError, AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import { authApi } from '../auth';
 import axios from 'axios';
+import { ROUTES } from '@src/routes';
 
 const authReqInterceptor = (inst: AxiosInstance) => {
   inst.interceptors.request.use(
@@ -58,7 +59,11 @@ const authResInterceptor = (inst: AxiosInstance) => {
 
         if (!refreshToken) {
           Tokens.clearTokens();
-          window.location.href = '/login';
+          const availableRoutes = [ROUTES.login, ROUTES.index, ROUTES.registration];
+
+          if (!availableRoutes.includes(window.location.pathname)) {
+            window.location.href = ROUTES.login;
+          }
           return Promise.reject(error);
         }
 

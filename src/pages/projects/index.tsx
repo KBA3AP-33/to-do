@@ -1,19 +1,26 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { DebouncedSearch } from '@src/components/debounced-search';
 import { Loader } from '@src/components/loader';
+import { ModalTitle } from '@src/components/modal-title';
 import { ProtectedRoute } from '@src/components/protected-route';
 import { CreateProjectForm } from '@src/containers/create-project-form';
 import { DeleteProjectModal } from '@src/containers/delete-project-modal';
 import { ProjectList } from '@src/containers/project-list';
 import { UpdateProjectForm } from '@src/containers/update-project-form';
 import { MainLayout } from '@src/layouts/main';
-import { useFavoriteProjectMutation, useGetProjectsQuery, useLazyGetProjectQuery } from '@src/store/projects/api';
+import {
+  useCompleteAllTasksMutation,
+  useFavoriteProjectMutation,
+  useGetProjectsQuery,
+  useLazyGetProjectQuery,
+} from '@src/store/projects/api';
 import { type QueryParams } from '@src/types';
 import { exclude } from '@src/utils/exclude';
 import { plural } from '@src/utils/plural';
-import { Button, Divider, Modal, Typography } from 'antd';
+import { Button, Divider, Flex, Modal, Typography } from 'antd';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useNotifyEdit } from '@src/hooks/use-notify-edit';
 
 const { Title } = Typography;
 
@@ -26,6 +33,8 @@ export const ProjectsPage = () => {
 
   const [favoriteProject] = useFavoriteProjectMutation();
   const { data, isLoading } = useGetProjectsQuery(params, { refetchOnMountOrArgChange: true });
+
+  const [completeAllTasks] = useCompleteAllTasksMutation();
 
   const { data: items = [], page, total = 0 } = data ?? {};
 
@@ -48,9 +57,20 @@ export const ProjectsPage = () => {
     setParams({ search, page: 1 });
   };
 
+  const isOpenModal = !!project || (!project && isModalOpen);
+  const { editing, ref, notifyStart, notifyEnd } = useNotifyEdit('projects');
+
   const onCancel = () => {
     setIsModalOpen(false);
+    ref.current = null;
+    notifyEnd(project?.id ?? '');
     reset();
+  };
+
+  const onEdit = (id: string) => {
+    trigger(id);
+    ref.current = id;
+    notifyStart(id);
   };
 
   return (
@@ -59,7 +79,7 @@ export const ProjectsPage = () => {
         <Loader loading={isLoading}>
           <Title level={3}>Мои проекты</Title>
 
-          <div className="flex justify-center items-center gap-2 mb-2">
+          <Flex justify="center" align="center" gap={8} className="!mb-2">
             <DebouncedSearch placeholder="Поиск проектов" value={params.search} onSearch={onSearch} />
             <Button
               icon={<PlusOutlined />}
@@ -70,17 +90,17 @@ export const ProjectsPage = () => {
             >
               Добавить проект
             </Button>
-          </div>
+          </Flex>
 
           <Title level={5}>{plural(total, { one: 'проект', few: 'проекта', many: 'проектов' })}</Title>
-
           <Divider size="small" />
 
           <ProjectList
             items={items}
-            onEdit={trigger}
+            onEdit={onEdit}
             onDelete={setSelected}
             onFavorite={favoriteProject}
+            onCompleted={completeAllTasks}
             page={page}
             total={total}
             onChangePage={page => setParams({ page })}
@@ -89,19 +109,19 @@ export const ProjectsPage = () => {
           <DeleteProjectModal id={selected} onDelete={() => setSelected(null)} onCancel={() => setSelected(null)} />
 
           <Modal
-            title={
-              <>
-                <Title level={4}>{project ? 'Изменить' : 'Добавить'} проект</Title>
-                <Divider size="small" />
-              </>
-            }
-            open={!!project || (!project && isModalOpen)}
+            title={<ModalTitle title={(project ? 'Изменить' : 'Добавить') + ' проект'} />}
+            open={isOpenModal}
             onCancel={onCancel}
             footer={null}
             destroyOnHidden
           >
             {project ? (
-              <UpdateProjectForm project={project} onSubmit={reset} onCancel={onCancel} />
+              <UpdateProjectForm
+                project={project}
+                onSubmit={reset}
+                onCancel={onCancel}
+                isLock={(editing?.[project.id] ?? 0) > 0}
+              />
             ) : (
               <CreateProjectForm onSubmit={() => setIsModalOpen(false)} onCancel={() => setIsModalOpen(false)} />
             )}

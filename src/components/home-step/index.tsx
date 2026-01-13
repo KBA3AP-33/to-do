@@ -1,3 +1,4 @@
+import { useThemeToken } from '@src/hooks/use-theme-token';
 import { type FC } from 'react';
 
 interface Props {
@@ -7,9 +8,14 @@ interface Props {
 }
 
 export const HomeStep: FC<Props> = ({ num, title, subtitle }) => {
+  const { token } = useThemeToken();
+
   return (
     <div className="text-center p-6">
-      <div className="bg-[#ea4b3a] text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+      <div
+        className="text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6"
+        style={{ backgroundColor: token?.colorCustomPrimary }}
+      >
         {num}
       </div>
       <h3 className="text-xl font-semibold mb-4">{title}</h3>

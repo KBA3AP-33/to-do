@@ -1,11 +1,14 @@
-import { DownOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Dropdown, Layout, type MenuProps, Space } from 'antd';
+import { useState } from 'react';
+import { ROUTES } from '@src/routes';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '@src/store';
-import { Link, useNavigate } from 'react-router-dom';
-import { ROUTES } from '@src/routes';
-import { BreadCrumbNav } from '@src/components/bread-crumb-nav';
-import { logout } from '@src/store/auth/slice';
+import { Avatar, Dropdown, Flex, Layout, type MenuProps, Space } from 'antd';
+import { AuditOutlined, DownOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { BreadCrumbNav } from '@src/containers/bread-crumb-nav';
+import { logout, profile } from '@src/store/auth/slice';
+import { ModalProfile } from '../modal-profile';
+import { ThemeSwitcher } from '../theme-switcher';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -16,37 +19,56 @@ export const MainHeader = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const onLogout = async () => {
+    await dispatch(logout());
+    navigate(ROUTES.index);
+  };
+
   const items: MenuItem[] = [
+    {
+      key: 'profile',
+      icon: <AuditOutlined />,
+      label: 'Профиль',
+      onClick: async () => {
+        await dispatch(profile());
+        setIsModalOpen(true);
+      },
+    },
     {
       key: 'exit',
       icon: <LogoutOutlined />,
       label: 'Выйти',
-      onClick: async () => {
-        await dispatch(logout());
-        navigate(ROUTES.index);
-      },
+      onClick: onLogout,
     },
   ];
 
   return (
     <Header className="border-b-1 border-[#0505050f]">
-      <div className="flex justify-between items-center px-4">
+      <Flex justify="space-between" align="center" className="!px-4">
         <BreadCrumbNav />
 
-        {user ? (
-          <div className="flex items-center gap-2 cursor-pointer">
-            <Avatar icon={<UserOutlined />} />
-            <Dropdown menu={{ items }} trigger={['click']}>
-              <Space>
-                {user?.email}
-                <DownOutlined />
-              </Space>
-            </Dropdown>
-          </div>
-        ) : (
-          <Link to={ROUTES.login}>Войти</Link>
-        )}
-      </div>
+        <Flex align="center" gap={16}>
+          <ThemeSwitcher />
+
+          {user ? (
+            <Flex align="center" gap={8} className="cursor-pointer">
+              <Avatar src={user.image || undefined} alt="avatar" icon={<UserOutlined />} />
+              <Dropdown menu={{ items }} trigger={['click']}>
+                <Space>
+                  {user?.email}
+                  <DownOutlined />
+                </Space>
+              </Dropdown>
+            </Flex>
+          ) : (
+            <Link to={ROUTES.login}>Войти</Link>
+          )}
+        </Flex>
+
+        <ModalProfile isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onLogout={onLogout} />
+      </Flex>
     </Header>
   );
 };

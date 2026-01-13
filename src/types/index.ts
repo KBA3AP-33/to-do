@@ -27,7 +27,8 @@ export type Project = {
   color?: string;
   tasks: Task[];
   group: string;
-  isFavourites?: boolean;
+  isFavorite?: boolean;
+  isCompleted?: boolean;
 };
 
 export type Task = {
@@ -50,6 +51,15 @@ export interface User {
   id: number;
   email: string;
   username?: string;
+  lastname?: string;
+  phone?: string;
+  image?: string;
+  reg?: string;
+  lastActive?: string;
+  statistic?: {
+    inWork?: number;
+    fulfilled?: number;
+  };
 }
 
 export interface AuthState {

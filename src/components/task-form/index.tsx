@@ -37,12 +37,18 @@ export const TaskForm: FC<Props> = ({ isLoading, initialValues, submitText = 'Д
       </Form.Item>
 
       <Form.Item<FieldType> label="Описание" name="description">
-        <TextArea showCount maxLength={200} placeholder="Введите описание" style={{ height: 120, resize: 'none' }} />
+        <TextArea
+          showCount
+          maxLength={200}
+          placeholder="Введите описание"
+          className="!h-[120px] [&>textarea]:!resize-none"
+        />
       </Form.Item>
 
       <Flex gap={8}>
         <Form.Item<FieldType> label="Приоритет" name="priority" className="flex-1">
           <Select
+            data-testid="priority"
             placeholder="Приоритет"
             options={priorities.map(x => ({
               value: x.value,
@@ -55,6 +61,17 @@ export const TaskForm: FC<Props> = ({ isLoading, initialValues, submitText = 'Д
                 <Flex gap={8}>
                   <FlagOutlined style={{ color: `var(--color-${color}-600)` }} />
                   <p>{option.label}</p>
+                </Flex>
+              );
+            }}
+            labelRender={props => {
+              const priority = priorities.find(x => +x.value === +props.value);
+              const color = priority?.color;
+
+              return (
+                <Flex gap={8} align="center">
+                  <FlagOutlined style={{ color: `var(--color-${color}-600)` }} />
+                  <span style={{ color: `var(--color-${color}-600)` }}>Приоритет {+props.value + 1}</span>
                 </Flex>
               );
             }}

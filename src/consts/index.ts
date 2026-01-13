@@ -12,12 +12,13 @@ export const priorities = [
 ];
 
 export const API_ROUTES = {
+  UPLOAD: 'upload',
   PROJECTS: 'projects',
   TASKS: 'tasks',
 };
 
 export const QUERY_KEYS = {
-  PROJECTS: 'Projects',
-  TASKS: 'Tasks',
-  TASK: 'Task',
+  UPLOAD: 'upload',
+  PROJECTS: 'projects',
+  TASKS: 'tasks',
 };

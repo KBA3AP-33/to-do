@@ -11,18 +11,20 @@ interface Props {
 export const DeleteProjectModal: FC<Props> = ({ id, onDelete, onCancel }) => {
   const [deleteProject, { isLoading }] = useDeleteProjectMutation();
 
+  const handleDelete = async () => {
+    if (!id) return;
+
+    await deleteProject(id);
+    onDelete?.();
+  };
+
   return (
     <DeleteModal
       title="Удалить проект?"
-      description={`Проект будет удален безвозвратно.`}
+      description="Проект будет удален безвозвратно."
       isLoading={isLoading}
       open={!!id}
-      onOk={async () => {
-        if (!id) return;
-
-        await deleteProject(id);
-        onDelete?.();
-      }}
+      onOk={handleDelete}
       onCancel={onCancel}
     />
   );

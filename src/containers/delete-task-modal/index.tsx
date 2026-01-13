@@ -11,18 +11,20 @@ interface Props {
 export const DeleteTaskModal: FC<Props> = ({ id, onDelete, onCancel }) => {
   const [deleteTask, { isLoading }] = useDeleteTaskMutation();
 
+  const handleDelete = async () => {
+    if (!id) return;
+
+    await deleteTask(id);
+    onDelete?.();
+  };
+
   return (
     <DeleteModal
       title="Удалить задачу?"
       description={`Задача будет удалена безвозвратно.`}
       isLoading={isLoading}
       open={!!id}
-      onOk={async () => {
-        if (!id) return;
-
-        await deleteTask(id);
-        onDelete?.();
-      }}
+      onOk={handleDelete}
       onCancel={onCancel}
     />
   );

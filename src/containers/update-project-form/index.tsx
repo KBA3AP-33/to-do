@@ -7,9 +7,10 @@ interface Props {
   project: Project;
   onSubmit?: () => void;
   onCancel?: () => void;
+  isLock?: boolean;
 }
 
-export const UpdateProjectForm: FC<Props> = ({ project, onSubmit, onCancel }) => {
+export const UpdateProjectForm: FC<Props> = ({ project, onSubmit, onCancel, isLock }) => {
   const [updateProject, { isLoading }] = useUpdateProjectMutation();
 
   return (
@@ -22,6 +23,7 @@ export const UpdateProjectForm: FC<Props> = ({ project, onSubmit, onCancel }) =>
         onSubmit?.();
       }}
       onCancel={onCancel}
+      isLock={isLock}
     />
   );
 };

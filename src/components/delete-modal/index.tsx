@@ -7,7 +7,7 @@ interface Props extends ModalProps {
   description: string;
 }
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export const DeleteModal: FC<Props> = ({ isLoading, title, description, ...props }) => {
   return (
@@ -18,7 +18,7 @@ export const DeleteModal: FC<Props> = ({ isLoading, title, description, ...props
       cancelText={'Отмена'}
       {...props}
     >
-      <p>{description}</p>
+      <Text>{description}</Text>
     </Modal>
   );
 };

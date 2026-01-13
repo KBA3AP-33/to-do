@@ -1,20 +1,32 @@
-import { PlusOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
-import { MainLayout } from '@src/layouts/main';
-import { Button, Divider, Modal, Typography } from 'antd';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useFavoriteProjectMutation, useGetProjectQuery } from '@src/store/projects/api';
-import { useGetTasksQuery, useLazyGetTaskQuery, useUpdateStatusTaskMutation } from '@src/store/tasks/api';
+import { MainLayout } from '@src/layouts/main';
+import { Button, Divider, Flex, Modal, Typography } from 'antd';
+import { CheckCircleOutlined, PlusOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
+import { useCompleteAllTasksMutation, useFavoriteProjectMutation, useGetProjectQuery } from '@src/store/projects/api';
+import {
+  useCreateTaskMutation,
+  useGetTasksQuery,
+  useLazyGetTaskQuery,
+  useUpdateStatusTaskMutation,
+} from '@src/store/tasks/api';
+import { Loader } from '@src/components/loader';
+import { ModalTitle } from '@src/components/modal-title';
 import { UpdateTaskForm } from '@src/containers/update-task-form';
 import { DeleteTaskModal } from '@src/containers/delete-task-modal';
 import { CreateTaskForm } from '@src/containers/create-task-form';
-import { Loader } from '@src/components/loader';
 import { ProtectedRoute } from '@src/components/protected-route';
 import { ProjectItemList } from '@src/containers/project-item-list';
+import { ProjectStatus as ProjectStatusType } from '@src/config/statuses/project';
+import { ProjectStatus } from '@src/components/project-status';
+import type { Task } from '@src/types';
+import { useThemeToken } from '@src/hooks/use-theme-token';
 
 const { Title } = Typography;
 
 export const ProjectItemPage = () => {
+  const { token } = useThemeToken();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -24,7 +36,10 @@ export const ProjectItemPage = () => {
 
   const { data: tasks } = useGetTasksQuery(id);
   const [updateStatusTask] = useUpdateStatusTaskMutation();
-  const [favoriteProject] = useFavoriteProjectMutation();
+  const [favoriteProject, { isLoading: isLoadingFavorite }] = useFavoriteProjectMutation();
+
+  const [completeAllTasks, { isLoading: isLoadingComplete }] = useCompleteAllTasksMutation();
+  const [createTask] = useCreateTaskMutation();
 
   const [trigger, { data: task, reset }] = useLazyGetTaskQuery();
 
@@ -33,28 +48,38 @@ export const ProjectItemPage = () => {
     reset();
   };
 
+  const onDuplicate = async ({ name, description, date, priority, project, projectId }: Task) => {
+    const { data } = await createTask({ name, description, date, priority, project, projectId });
+    const { id } = data?.data ?? {};
+    if (id) trigger(id);
+  };
+
+  const color = project?.isFavorite ? token?.colorCustomPrimary : '#cacaca';
+  const favoriteIcon = project?.isFavorite ? <StarFilled style={{ color }} /> : <StarOutlined style={{ color }} />;
+
   return (
     <ProtectedRoute>
       <MainLayout>
         <Loader loading={isLoading}>
-          <div className="flex justify-between items-center gap-2 mb-2">
+          <Flex justify="space-between" align="center" gap={8} className="!mb-2">
             <Title level={3}>{project?.name}</Title>
 
-            <div className="flex items-center gap-2">
+            <Flex align="center" gap={8}>
+              {project?.isCompleted && (
+                <ProjectStatus
+                  className="!h-[32px] !flex !items-center !px-6 radius-[6px] !border-[#389e0d]"
+                  status={ProjectStatusType.COMPLETED}
+                  icon={<CheckCircleOutlined />}
+                />
+              )}
+
               <Button
                 type="default"
+                loading={isLoadingFavorite}
+                icon={favoriteIcon}
                 onClick={async () => await favoriteProject(id)}
-                icon={
-                  project?.isFavourites ? (
-                    <StarFilled style={{ color: '#ea4b3a' }} />
-                  ) : (
-                    <StarOutlined style={{ color: '#cacaca' }} />
-                  )
-                }
-                style={{
-                  fontSize: '16px',
-                  borderColor: project?.isFavourites ? '#ea4b3a' : '',
-                }}
+                style={{ borderColor: color }}
+                className="!text-base"
               />
 
               <Button
@@ -66,25 +91,34 @@ export const ProjectItemPage = () => {
               >
                 Добавить задачу
               </Button>
-            </div>
-          </div>
+              {!project?.isCompleted && !!project?.tasks?.length && (
+                <Button
+                  loading={isLoadingComplete}
+                  icon={<CheckCircleOutlined />}
+                  iconPlacement="start"
+                  variant="solid"
+                  color="primary"
+                  onClick={async () => await completeAllTasks(`${project?.id}`)}
+                >
+                  Завершить
+                </Button>
+              )}
+            </Flex>
+          </Flex>
+          <Divider size="small" />
 
           <ProjectItemList
             items={tasks?.data}
             onEdit={trigger}
             onDelete={setSelected}
             onUpdateStatus={updateStatusTask}
+            onDuplicate={onDuplicate}
           />
 
           <DeleteTaskModal id={selected} onDelete={() => setSelected(null)} onCancel={() => setSelected(null)} />
 
           <Modal
-            title={
-              <>
-                <Title level={4}>{task ? 'Изменить' : 'Добавить'} задачу</Title>
-                <Divider size="small" />
-              </>
-            }
+            title={<ModalTitle title={(task ? 'Изменить' : 'Добавить') + ' задачу'} />}
             open={!!task || (!task && isModalOpen)}
             onCancel={onCancel}
             footer={null}

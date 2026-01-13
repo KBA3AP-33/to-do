@@ -1,17 +1,21 @@
 import App from './App.tsx';
 import { store } from '@src/store';
 import { StrictMode } from 'react';
-import { ConfigProvider } from 'antd';
-import { createRoot } from 'react-dom/client';
-import { themeConfig } from './theme/index.ts';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
+import { ThemeProvider } from './context/theme/index.tsx';
 
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')!;
+
+const jsx = (
   <StrictMode>
-    <ConfigProvider theme={themeConfig}>
+    <ThemeProvider>
       <Provider store={store}>
         <App />
       </Provider>
-    </ConfigProvider>
+    </ThemeProvider>
   </StrictMode>
 );
+
+if (container.innerHTML !== '') hydrateRoot(container, jsx);
+else createRoot(container).render(jsx);

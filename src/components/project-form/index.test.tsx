@@ -1,174 +1,216 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ProjectForm } from '.';
+import '@testing-library/jest-dom';
+import { ProjectForm, type FieldType } from '.';
+import { useThemeToken } from '@src/hooks/use-theme-token';
 
-// Мок для ResizeObserver который используется antd
 global.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
 };
 
-describe('ProjectForm component', () => {
-  test('renders correctly with all form elements', () => {
-    render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} />);
+jest.mock('@src/hooks/use-theme-token');
 
-    expect(screen.getByLabelText('Имя')).toBeInTheDocument();
-    expect(screen.getByLabelText('Описание')).toBeInTheDocument();
-    expect(screen.getByText('Цвет')).toBeInTheDocument();
-    expect(screen.getByText('Добавить в избранное')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Отмена' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Добавить' })).toBeInTheDocument();
+describe('ProjectForm', () => {
+  const mockOnSubmit = jest.fn();
+  const mockOnCancel = jest.fn();
+  let user: ReturnType<typeof userEvent.setup>;
+
+  const mockInitialValues: FieldType = {
+    name: 'Тестовый проект',
+    description: 'Описание тестового проекта',
+    color: '#FF5733',
+    isFavorite: true,
+  };
+
+  const defaultToken = {
+    colorProject: '#ff00ff',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    user = userEvent.setup();
+
+    (useThemeToken as jest.Mock).mockReturnValue({ token: defaultToken });
   });
 
-  test('uses custom submitText when provided', () => {
-    const customText = 'Сохранить проект';
-    render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} submitText={customText} />);
+  describe('Рендер компонента', () => {
+    test('Рендер формы', () => {
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-    expect(screen.getByRole('button', { name: customText })).toBeInTheDocument();
+      expect(screen.getByLabelText(/имя/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/описание/i)).toBeInTheDocument();
+      expect(screen.getByTestId(/color/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/добавить в избранное/i)).toBeInTheDocument();
+
+      expect(screen.getByRole('button', { name: /отмена/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /добавить/i })).toBeInTheDocument();
+
+      expect(screen.getByPlaceholderText('Введите имя')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Введите описание')).toBeInTheDocument();
+    });
+
+    test('Рендер с init', () => {
+      render(<ProjectForm initialValues={mockInitialValues} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+
+      const nameInput = screen.getByLabelText(/имя/i) as HTMLInputElement;
+      const descriptionTextarea = screen.getByLabelText(/описание/i) as HTMLTextAreaElement;
+      const favoriteSwitch = screen.getByLabelText(/добавить в избранное/i);
+
+      expect(nameInput.value).toBe(mockInitialValues.name);
+      expect(descriptionTextarea.value).toBe(mockInitialValues.description);
+      expect(favoriteSwitch).toBeChecked();
+    });
+
+    test('Цвет из токена', () => {
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+      expect(useThemeToken).toHaveBeenCalled();
+    });
+
+    test('Рендер Alert при isLock = true', () => {
+      render(<ProjectForm isLock={true} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+
+      const alert = screen.getByRole('alert');
+      expect(alert).toBeInTheDocument();
+      expect(alert).toHaveTextContent(/редактируется в другой вкладке/i);
+    });
+
+    test('Рендер Alert при isLock = false', () => {
+      render(<ProjectForm isLock={false} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
   });
 
-  test('Компоненты из Ant', () => {
-    const { container } = render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} />);
+  describe('Валидация формы', () => {
+    test('Не заполнено обязательное поле', async () => {
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-    expect(container.querySelector('.ant-form')).toBeInTheDocument();
-    expect(container.querySelector('.ant-btn')).toBeInTheDocument();
+      const button = screen.getByRole('button', { name: /добавить/i });
+      await user.click(button);
+
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+    });
+
+    test('Заполнено обязательное поле', async () => {
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+
+      await user.type(screen.getByLabelText(/имя/i), 'Только имя');
+
+      const button = screen.getByRole('button', { name: /добавить/i });
+      await user.click(button);
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith({
+          name: 'Только имя',
+          description: undefined,
+          color: defaultToken.colorProject,
+          isFavorite: undefined,
+        });
+      });
+    });
+
+    test('Ограничение длины имени', async () => {
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+
+      const nameInput = screen.getByLabelText(/имя/i);
+      await user.type(nameInput, 'A'.repeat(130));
+
+      expect((nameInput as HTMLInputElement).value.length).toBeLessThanOrEqual(120);
+    });
+
+    test('Ограничение длины описания', async () => {
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+
+      const descriptionInput = screen.getByLabelText(/описание/i);
+      await user.type(descriptionInput, 'A'.repeat(250));
+
+      expect((descriptionInput as HTMLTextAreaElement).value.length).toBeLessThanOrEqual(200);
+    });
   });
 
-  test('Рендер с init', () => {
-    const initialValues = {
-      name: 'Тестовый проект',
-      description: 'Тестовое описание',
-      color: '#ff0000',
-      isFavourites: true,
-    };
+  describe('Отправка формы', () => {
+    test('Все заполненные поля', async () => {
+      const formData = { name: 'Новый проект', description: 'Описание проекта', isFavorite: true };
 
-    render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} initialValues={initialValues} />);
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-    expect(screen.getByLabelText('Имя')).toBeInTheDocument();
-    expect(screen.getByLabelText('Описание')).toBeInTheDocument();
-  });
-});
+      await user.type(screen.getByLabelText(/имя/i), formData.name);
+      await user.type(screen.getByLabelText(/описание/i), formData.description);
+      await user.click(screen.getByLabelText(/добавить в избранное/i));
 
-describe('Валидация', () => {
-  test('name field exists and has correct label', () => {
-    render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} />);
+      const button = screen.getByRole('button', { name: /добавить/i });
+      await user.click(button);
 
-    const nameLabel = screen.getByText('Имя');
-    expect(nameLabel).toBeInTheDocument();
-  });
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining(formData));
+      });
+    });
 
-  test('description field exists', () => {
-    render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} />);
+    test('Отправка init', async () => {
+      render(<ProjectForm initialValues={mockInitialValues} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-    const descriptionLabel = screen.getByText('Описание');
-    expect(descriptionLabel).toBeInTheDocument();
-  });
-});
-
-describe('ProjectForm button interactions', () => {
-  test('cancel button calls onCancel when clicked', () => {
-    const handleCancel = jest.fn();
-    render(<ProjectForm onSubmit={() => {}} onCancel={handleCancel} />);
-
-    const cancelButton = screen.getByRole('button', { name: 'Отмена' });
-    fireEvent.click(cancelButton);
-
-    expect(handleCancel).toHaveBeenCalledTimes(1);
+      const button = screen.getByRole('button', { name: /добавить/i });
+      await user.click(button);
+      await waitFor(() => expect(mockOnSubmit).toHaveBeenCalledWith(mockInitialValues));
+    });
   });
 
-  test('submit button exists and has correct text', () => {
-    render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} />);
+  describe('Взаимодействие с формой', () => {
+    test('switch', async () => {
+      render(<ProjectForm initialValues={{ isFavorite: false }} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-    const submitButton = screen.getByRole('button', { name: 'Добавить' });
-    expect(submitButton).toBeInTheDocument();
+      const favorite = screen.getByLabelText(/добавить в избранное/i);
+      expect(favorite).not.toBeChecked();
+
+      await user.click(favorite);
+      expect(favorite).toBeChecked();
+
+      await user.click(favorite);
+      expect(favorite).not.toBeChecked();
+    });
+
+    test('onCancel при клике на кнопку отмены', async () => {
+      render(<ProjectForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+
+      const button = screen.getByRole('button', { name: /отмена/i });
+      await user.click(button);
+
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
   });
 
-  test('submit button uses custom text', () => {
-    render(<ProjectForm onSubmit={() => {}} onCancel={() => {}} submitText="Сохранить изменения" />);
+  describe('Обновление init', () => {
+    test('Обновление формы при изменении init', async () => {
+      const { rerender } = render(
+        <ProjectForm initialValues={mockInitialValues} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
+      );
 
-    const submitButton = screen.getByRole('button', { name: 'Сохранить изменения' });
-    expect(submitButton).toBeInTheDocument();
-  });
-});
+      const newValues = {
+        name: 'Новый проект',
+        description: 'Новое описание',
+        color: '#00FF00',
+        isFavorite: false,
+      };
 
-describe('ProjectForm user interaction', () => {
-  test('fills and submits form correctly', async () => {
-    const user = userEvent.setup();
-    const handleSubmit = jest.fn();
+      rerender(<ProjectForm initialValues={newValues} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-    render(<ProjectForm onSubmit={handleSubmit} onCancel={() => {}} submitText="Сохранить" />);
+      await waitFor(() => {
+        const nameInput = screen.getByLabelText(/имя/i) as HTMLInputElement;
+        const descriptionInput = screen.getByLabelText(/описание/i) as HTMLTextAreaElement;
+        const favoriteSwitch = screen.getByLabelText(/добавить в избранное/i);
 
-    // 1. Заполняем поле имени
-    const nameInput = screen.getByLabelText('Имя');
-    await user.type(nameInput, 'Мой новый проект');
+        expect(nameInput.value).toBe(newValues.name);
+        expect(descriptionInput.value).toBe(newValues.description);
+        expect(favoriteSwitch).not.toBeChecked();
+      });
+    });
 
-    // 2. Заполняем поле описания
-    const descriptionTextarea = screen.getByLabelText('Описание');
-    await user.type(descriptionTextarea, 'Это описание моего нового проекта');
+    test('Отсутствии цвета в init', async () => {
+      const init = { name: 'Проект', description: 'Описание' };
 
-    // 3. Включаем переключатель "Избранное"
-    const favouriteSwitch = screen.getByRole('switch');
-    await user.click(favouriteSwitch);
-
-    // 4. Нажимаем кнопку отправки
-    const submitButton = screen.getByRole('button', { name: 'Сохранить' });
-    await user.click(submitButton);
-
-    // 5. Проверяем что onSubmit был вызван
-    expect(handleSubmit).toHaveBeenCalledTimes(1);
-
-    // 6. Проверяем что в onSubmit переданы правильные данные
-    expect(handleSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Мой новый проект',
-        description: 'Это описание моего нового проекта',
-        isFavourites: true,
-      })
-    );
-  });
-
-  // test('fills form with all fields including color and submits', async () => {
-  //   const user = userEvent.setup();
-  //   const handleSubmit = jest.fn();
-
-  //   render(<ProjectForm onSubmit={handleSubmit} onCancel={() => {}} />);
-
-  //   // Заполняем все поля
-  //   await user.type(screen.getByLabelText('Имя'), 'Проект с цветом');
-  //   await user.type(screen.getByLabelText('Описание'), 'Проект с выбранным цветом');
-
-  //   // Выбираем цвет (если ColorPicker рендерится как input[type="color"])
-  //   const colorInputs = screen.getAllByLabelText('Цвет');
-  //   const colorPicker = colorInputs.find(input => input.tagName === 'INPUT');
-
-  //   if (colorPicker) {
-  //     await user.type(colorPicker, '#ff5733');
-  //   }
-
-  //   // Отправляем форму
-  //   await user.click(screen.getByRole('button', { name: 'Добавить' }));
-
-  //   expect(handleSubmit).toHaveBeenCalledTimes(1);
-  // });
-
-  test('submits form with only required field', async () => {
-    const user = userEvent.setup();
-    const handleSubmit = jest.fn();
-
-    render(<ProjectForm onSubmit={handleSubmit} onCancel={() => {}} />);
-
-    // Заполняем только обязательное поле
-    await user.type(screen.getByLabelText('Имя'), 'Только имя');
-
-    // Отправляем форму
-    await user.click(screen.getByRole('button', { name: 'Добавить' }));
-
-    expect(handleSubmit).toHaveBeenCalledTimes(1);
-    expect(handleSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Только имя',
-      })
-    );
+      render(<ProjectForm initialValues={init} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+      expect(useThemeToken).toHaveBeenCalled();
+    });
   });
 });
