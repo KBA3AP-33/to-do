@@ -14,12 +14,14 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "cleanup": "npm run lint:fix && npm run format",
+    "build:gh-pages": "tsc && vite build --config vite.config.gh-pages.ts",
     "build:ssr": "tsc && vite build && node server/build.js",
     "start:ssr": "node server/server.js",
     "preview:ssr": "npm run build:ssr && npm run start:ssr",
     "dev:docker": "docker build -f Dockerfile.dev -t todo-app-dev . && docker run -p 5173:5173 --rm todo-app-dev",
     "dev:docker:compose": "docker-compose -f docker-compose.dev.yml up"
   },
+  "homepage": "https://KBA3AP-33.github.io/to-do/",
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
     "@babel/plugin-transform-runtime": "^7.28.5",
