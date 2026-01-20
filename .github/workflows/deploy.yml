@@ -18,10 +18,7 @@ concurrency:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [18.x]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
