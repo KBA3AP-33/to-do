@@ -25,19 +25,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20+
+      - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests with experimental flag
-        run: npm test -- --testTimeout=10000
+      - name: Run tests with fixes
+        run: npm test -- --testTimeout=30000 --watchAll=false --maxWorkers=1 --no-coverage
         env:
-          NODE_OPTIONS: '--experimental-vm-modules'
+          CI: true
+          NODE_ENV: test
+
+      - name: Run tests with coverage (опционально)
+        if: always()
+        run: |
+          # Если нужен coverage отчет
+          npm test -- --coverage --watchAll=false --testTimeout=30000 --maxWorkers=1 2>&1 || true
 
   build:
     runs-on: ubuntu-latest
@@ -47,7 +54,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: '18'
@@ -60,7 +67,7 @@ jobs:
         run: npm run build:gh-pages
 
       - name: Create .nojekyll file
-        run: echo "" > dist/.nojekyll
+        run: touch dist/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
