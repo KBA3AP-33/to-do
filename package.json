@@ -19,7 +19,8 @@
     "start:ssr": "node server/server.js",
     "preview:ssr": "npm run build:ssr && npm run start:ssr",
     "dev:docker": "docker build -f Dockerfile.dev -t todo-app-dev . && docker run -p 5173:5173 --rm todo-app-dev",
-    "dev:docker:compose": "docker-compose -f docker-compose.dev.yml up"
+    "dev:docker:compose": "docker-compose -f docker-compose.dev.yml up",
+    "msw:init": "msw init public/"
   },
   "homepage": "https://KBA3AP-33.github.io/to-do/",
   "dependencies": {
@@ -54,6 +55,7 @@
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
     "lodash": "^4.17.21",
+    "msw": "^2.12.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",
@@ -74,5 +76,10 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.49.0",
     "vite": "^7.2.4"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
