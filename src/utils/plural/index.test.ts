@@ -4,13 +4,13 @@ describe('plural', () => {
   describe('Ru', () => {
     const ru = { one: 'проект', few: 'проекта', many: 'проектов' };
 
-    test('1, 21, 101', () => {
+    test('Должно корректно работать для: 1, 21, 101', () => {
       expect(plural(1, ru)).toBe(`1 ${ru.one}`);
       expect(plural(21, ru)).toBe(`21 ${ru.one}`);
       expect(plural(101, ru)).toBe(`101 ${ru.one}`);
     });
 
-    test('2-4, 22-24, 102-104', () => {
+    test('Должно корректно работать для: 2-4, 22-24, 102-104', () => {
       expect(plural(2, ru)).toBe(`2 ${ru.few}`);
       expect(plural(3, ru)).toBe(`3 ${ru.few}`);
       expect(plural(4, ru)).toBe(`4 ${ru.few}`);
@@ -22,7 +22,7 @@ describe('plural', () => {
       expect(plural(104, ru)).toBe(`104 ${ru.few}`);
     });
 
-    test('0, 5-20, 25-30, 105', () => {
+    test('Должно корректно работать для: 0, 5-20, 25-30, 105', () => {
       expect(plural(0, ru)).toBe(`0 ${ru.many}`);
       expect(plural(5, ru)).toBe(`5 ${ru.many}`);
       expect(plural(10, ru)).toBe(`10 ${ru.many}`);
@@ -35,7 +35,7 @@ describe('plural', () => {
       expect(plural(105, ru)).toBe(`105 ${ru.many}`);
     });
 
-    test('Отрицательные числа', () => {
+    test('Должно корректно работать для отрицательных чисел', () => {
       expect(plural(-1, ru)).toBe(`-1 ${ru.one}`);
       expect(plural(-2, ru)).toBe(`-2 ${ru.few}`);
       expect(plural(-5, ru)).toBe(`-5 ${ru.many}`);
@@ -45,13 +45,13 @@ describe('plural', () => {
   describe('En', () => {
     const en = { one: 'project', few: 'projects', many: 'projects' };
 
-    test('1, 21, 101', () => {
+    test('Должно корректно работать для: 1, 21, 101', () => {
       expect(plural(1, en)).toBe(`1 ${en.one}`);
       expect(plural(21, en)).toBe(`21 ${en.one}`);
       expect(plural(101, en)).toBe(`101 ${en.one}`);
     });
 
-    test('0, 2-20, 22-30, 100+', () => {
+    test('Должно корректно работать для: 0, 2-20, 22-30, 100+', () => {
       expect(plural(0, en)).toBe(`0 ${en.many}`);
       expect(plural(2, en)).toBe(`2 ${en.many}`);
       expect(plural(3, en)).toBe(`3 ${en.many}`);
@@ -74,7 +74,7 @@ describe('plural', () => {
       expect(plural(105, en)).toBe(`105 ${en.many}`);
     });
 
-    test('Отрицательные числа', () => {
+    test('Должно корректно работать для отрицательных чисел', () => {
       expect(plural(-1, en)).toBe(`-1 ${en.one}`);
       expect(plural(-2, en)).toBe(`-2 ${en.many}`);
       expect(plural(-5, en)).toBe(`-5 ${en.many}`);

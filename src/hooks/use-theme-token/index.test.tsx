@@ -1,12 +1,10 @@
-import { renderHook, act, render } from '@testing-library/react';
+import { renderHook, render } from '@testing-library/react';
 import { theme } from 'antd';
 import type { ThemeConfig } from '@src/theme';
 import { useThemeToken } from '.';
 
 jest.mock('antd', () => ({
-  theme: {
-    useToken: jest.fn(),
-  },
+  theme: { useToken: jest.fn() },
 }));
 
 const mockAntdTheme = theme as jest.Mocked<typeof theme>;
@@ -35,14 +33,14 @@ describe('useThemeToken', () => {
   });
 
   describe('Базовые тесты', () => {
-    test('Создание токена', () => {
+    test('Должен создать токен', () => {
       const { result } = renderHook(() => useThemeToken());
 
       expect(result.current).toEqual({ token: mockToken });
       expect(mockAntdTheme.useToken).toHaveBeenCalledTimes(1);
     });
 
-    test('Структура токена', () => {
+    test('Должен сохранить правильную структуру токена', () => {
       const { result } = renderHook(() => useThemeToken());
 
       expect(result.current.token).toHaveProperty('colorPrimary');
@@ -55,7 +53,7 @@ describe('useThemeToken', () => {
       expect(typeof result.current.token?.test).toBe('string');
     });
 
-    test('Перезапись токена', () => {
+    test('Должен перезаписать токен', () => {
       const diffMockToken: ThemeConfig['token'] = {
         colorPrimary: '#ffffff',
         colorBgBase: '#000000',
@@ -72,7 +70,7 @@ describe('useThemeToken', () => {
       expect(result.current.token).toEqual(diffMockToken);
     });
 
-    test('Изменение токена', () => {
+    test('Должен измененить токен', () => {
       const { result, rerender } = renderHook(() => useThemeToken());
       const initialToken = result.current.token;
 
@@ -88,7 +86,7 @@ describe('useThemeToken', () => {
       expect(result.current.token?.colorPrimary).toBe('#fff000');
     });
 
-    test('Несколько хуков', () => {
+    test('Должен корректно отрабать при нескольких хуках', () => {
       const { result: result1 } = renderHook(() => useThemeToken());
       const { result: result2 } = renderHook(() => useThemeToken());
 
@@ -98,7 +96,7 @@ describe('useThemeToken', () => {
   });
 
   describe('Пустые тесты', () => {
-    test('should handle empty or minimal token object', () => {
+    test('Должен корректно отрабать с пустым объектом', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockAntdTheme.useToken.mockReturnValue({ token: {}, theme: {} } as any);
 
@@ -106,7 +104,7 @@ describe('useThemeToken', () => {
       expect(result.current.token).toEqual({});
     });
 
-    test('null', () => {
+    test('Должен корректно отрабать с null', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockAntdTheme.useToken.mockReturnValue({ token: null, theme: null } as any);
       expect(() => renderHook(() => useThemeToken())).not.toThrow();
@@ -114,7 +112,7 @@ describe('useThemeToken', () => {
   });
 
   describe('Интеграционные тесты', () => {
-    test('should provide tokens to consuming component', () => {
+    test('Должен взаимодействовать с компонентом', () => {
       const Test = () => {
         const { token } = useThemeToken();
         return <div style={{ color: token?.colorPrimary }}>Test</div>;
@@ -126,7 +124,7 @@ describe('useThemeToken', () => {
       expect(div?.style.color).toBe('rgb(255, 0, 0)');
     });
 
-    test('Ререндер компонента', () => {
+    test('Должен корректно перерендерить компонент', () => {
       let count = 0;
 
       const Test = () => {

@@ -26,15 +26,19 @@ describe('useRouter', () => {
     mockCreateBrowserRouter.mockReturnValue('mock-router');
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('Базовые тесты', () => {
-    test('Рендер', () => {
+    test('Должен отрендериться роутер', () => {
       const { result } = renderHook(() => useRouter());
 
       expect(createBrowserRouter).toHaveBeenCalledTimes(1);
       expect(result.current).toBe('mock-router');
     });
 
-    test('Создание роутера с ErrorBoundary', () => {
+    test('Должен создаться роутер с ErrorBoundary', () => {
       const { result } = renderHook(() => useRouter());
 
       expect(createBrowserRouter).toHaveBeenCalledWith([
@@ -46,7 +50,7 @@ describe('useRouter', () => {
       expect(result.current).toBe('mock-router');
     });
 
-    test('Мемоизация', () => {
+    test('Должен работать мемоизация', () => {
       const { result, rerender } = renderHook(() => useRouter());
       const router = result.current;
 
@@ -57,7 +61,7 @@ describe('useRouter', () => {
       expect(result.current).toBe(router);
     });
 
-    test('ErrorBoundary для всех роутов', () => {
+    test('Должен быть ErrorBoundary для всех роутов', () => {
       jest.isolateModules(() => {
         jest.doMock('@src/routes/config', () => ({
           routes: [
@@ -79,7 +83,7 @@ describe('useRouter', () => {
   });
 
   describe('Пустые', () => {
-    test('Error', () => {
+    test('Должна вернуться ошибка', () => {
       const error = 'Router creation failed';
 
       mockCreateBrowserRouter.mockImplementation(() => {
@@ -91,7 +95,7 @@ describe('useRouter', () => {
   });
 
   describe('Интеграционные', () => {
-    test('Структура роутов', () => {
+    test('Должна быть корректная структура роутов', () => {
       jest.isolateModules(() => {
         jest.doMock('@src/routes/config', () => ({
           routes: [

@@ -7,6 +7,12 @@ if (typeof MessageChannel === 'undefined') {
   };
 }
 
+global.ResizeObserver = jest.fn(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 global.matchMedia =
   global.matchMedia ||
   function () {

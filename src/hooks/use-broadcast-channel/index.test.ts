@@ -54,7 +54,7 @@ describe('useBroadcastChannel', () => {
       global.BroadcastChannel = originalBroadcastChannel;
     });
 
-    test('Создание канала', () => {
+    test('Должен создаваться канал', () => {
       const channelName = 'test';
       const { result } = renderHook(() => useBroadcastChannel(channelName));
 
@@ -62,7 +62,7 @@ describe('useBroadcastChannel', () => {
       expect(typeof result.current.postMessage).toBe('function');
     });
 
-    test('Отправка сообщения', () => {
+    test('Должны отправляться сообщения', () => {
       const channelName = 'test';
       const mockPostMessage = jest.fn();
 
@@ -79,7 +79,7 @@ describe('useBroadcastChannel', () => {
       expect(mockPostMessage).toHaveBeenCalledWith(msg);
     });
 
-    test('Отправка сообщения в разные каналы', async () => {
+    test('Должны отправляться сообщения в разные каналы', async () => {
       const channel1Name = 'test 1';
       const channel2Name = 'test 2';
       const mockPostMessage1 = jest.fn();
@@ -110,7 +110,7 @@ describe('useBroadcastChannel', () => {
       expect(mockPostMessage2).toHaveBeenCalledWith(msg2);
     });
 
-    test('Unmount - cleanup', () => {
+    test('Должно отрабатывать cleanup при размонтировании', () => {
       const channelName = 'test-channel';
       const handleMessage = jest.fn();
       const closeSpy = jest.fn();
@@ -128,7 +128,7 @@ describe('useBroadcastChannel', () => {
       expect(closeSpy).toHaveBeenCalledTimes(1);
     });
 
-    test('Unmount - cleanup -> message', () => {
+    test('Должно отрабатывать cleanup при размонтировании с последующей отправкой сообщения', () => {
       const channelName = 'test';
       const { result, unmount } = renderHook(() => useBroadcastChannel(channelName));
       unmount();
@@ -136,7 +136,7 @@ describe('useBroadcastChannel', () => {
       expect(() => result.current.postMessage('test')).not.toThrow();
     });
 
-    test('Без onMessage', () => {
+    test('Должно работать без onMessage', () => {
       const channelName = 'test-channel';
 
       const { result } = renderHook(() => useBroadcastChannel(channelName));
@@ -145,7 +145,7 @@ describe('useBroadcastChannel', () => {
       expect(() => result.current.postMessage('test')).not.toThrow();
     });
 
-    test('Пустое название канала', () => {
+    test('Должно работать с пустым названием канала', () => {
       const channelName = '';
       const { result } = renderHook(() => useBroadcastChannel(channelName));
 
@@ -153,7 +153,7 @@ describe('useBroadcastChannel', () => {
       expect(() => result.current.postMessage('test')).not.toThrow();
     });
 
-    test('Ререндер', () => {
+    test('Должно корректно перерендериваться', () => {
       const channelName = 'test';
 
       const { result, rerender } = renderHook(({ name }: { name: string }) => useBroadcastChannel(name), {
@@ -169,7 +169,7 @@ describe('useBroadcastChannel', () => {
   });
 
   describe('Интеграционные тесты', () => {
-    test('Отправка сообщения в обе стороны', () => {
+    test('Должна работать отправка сообщениий в обе стороны', () => {
       class IntegrationBroadcastChannel {
         private static channels = new Map<string, Set<IntegrationBroadcastChannel>>();
         private listeners = new Set<(event: { data: unknown }) => void>();

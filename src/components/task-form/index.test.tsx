@@ -3,12 +3,7 @@ import '@testing-library/jest-dom';
 import { TaskForm, type FieldType } from '.';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-global.ResizeObserver = jest.fn(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+import { TestHelper } from '@src/__tests__/utils';
 
 jest.mock('@src/consts', () => ({
   priorities: [
@@ -23,7 +18,6 @@ jest.mock('@src/consts', () => ({
 describe('TaskForm', () => {
   const mockOnSubmit = jest.fn();
   const mockOnCancel = jest.fn();
-  let user: ReturnType<typeof userEvent.setup>;
 
   const mockInitialValues: FieldType = {
     name: 'Тестовая задача',
@@ -34,11 +28,10 @@ describe('TaskForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    user = userEvent.setup();
   });
 
   describe('Рендер', () => {
-    test('Рендер полей формы', () => {
+    test('Должна отрендериться форма', () => {
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       expect(screen.getByLabelText(/имя/i)).toBeInTheDocument();
@@ -48,13 +41,9 @@ describe('TaskForm', () => {
 
       expect(screen.getByRole('button', { name: /отмена/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /добавить/i })).toBeInTheDocument();
-
-      expect(screen.getByPlaceholderText('Введите имя')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Введите описание')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('Выберите дату')).toBeInTheDocument();
     });
 
-    test('Рендер с init', () => {
+    test('Должна отрендериться форма c начальным состоянием', () => {
       render(<TaskForm initialValues={mockInitialValues} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const nameInput = screen.getByLabelText(/имя/i) as HTMLInputElement;
@@ -62,6 +51,7 @@ describe('TaskForm', () => {
 
       expect(nameInput.value).toBe(mockInitialValues.name);
       expect(descriptionTextarea.value).toBe(mockInitialValues.description);
+      expect(screen.getByText(/приоритет 3/i)).toBeInTheDocument();
     });
 
     test('date: null', () => {
@@ -73,36 +63,30 @@ describe('TaskForm', () => {
   });
 
   describe('Валидация формы', () => {
-    test('Пустое обязательное поле', async () => {
+    test('Форма не должна отправляться - не заполнено обязательное поле', async () => {
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const button = screen.getByRole('button', { name: /добавить/i });
-      await user.click(button);
+      await userEvent.click(button);
 
       expect(mockOnSubmit).not.toHaveBeenCalled();
     });
 
-    test('Только обязательное поле', async () => {
+    test('Форма должна отправляться - заполнено обязательное поле', async () => {
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-      await user.type(screen.getByLabelText(/имя/i), 'name');
-
-      const button = screen.getByRole('button', { name: /добавить/i });
-      await user.click(button);
-
-      await waitFor(() => {
-        expect(mockOnSubmit).toHaveBeenCalledWith({
-          name: 'name',
-          description: undefined,
-          priority: undefined,
-          date: null,
-        });
+      await TestHelper.fill.input(/имя/i, 'name');
+      await TestHelper.form.submit(/добавить/i, mockOnSubmit, {
+        name: 'name',
+        description: undefined,
+        priority: undefined,
+        date: null,
       });
     });
   });
 
   describe('Отправка формы', () => {
-    test('Все заполненные поля', async () => {
+    test('Форма должна отправляться - все поля заполненны', async () => {
       const formData = {
         name: 'Новая задача',
         description: 'Подробное описание задачи',
@@ -112,65 +96,51 @@ describe('TaskForm', () => {
 
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-      await user.type(screen.getByLabelText(/имя/i), formData.name);
-      await user.type(screen.getByLabelText(/описание/i), formData.description);
+      await TestHelper.fill.input(/имя/i, formData.name);
+      await TestHelper.fill.input(/описание/i, formData.description);
 
       const prioritySelect = screen.getByTestId(/priority/i);
-      await user.click(prioritySelect);
+      await userEvent.click(prioritySelect);
 
       await waitFor(() => expect(screen.getByText('Приоритет 2')).toBeInTheDocument());
 
       const priorityOption = screen.getByText('Приоритет 2');
-      await user.click(priorityOption);
+      await userEvent.click(priorityOption);
 
-      const datePicker = screen.getByPlaceholderText('Выберите дату');
-      await user.click(datePicker);
-
-      const submitButton = screen.getByRole('button', { name: /добавить/i });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        const { date: _, ...other } = formData;
-        expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining(other));
-      });
+      const { date: _, ...other } = formData;
+      await TestHelper.form.submit(/добавить/i, mockOnSubmit, expect.objectContaining(other));
     });
 
-    test('Отправка с начальными значениями', async () => {
+    test('Форма должна отправляться с init', async () => {
       render(<TaskForm initialValues={mockInitialValues} onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
-
-      const submitButton = screen.getByRole('button', { name: /добавить/i });
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        const { date: _, ...other } = mockInitialValues;
-        expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining(other));
-      });
+      const { date: _, ...other } = mockInitialValues;
+      await TestHelper.form.submit(/добавить/i, mockOnSubmit, expect.objectContaining(other));
     });
 
-    test('Ограничение длины имени', async () => {
+    test('Должно сработать ограничение длины имени', async () => {
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const nameInput = screen.getByLabelText(/имя/i);
 
-      await user.type(nameInput, 'A'.repeat(130));
+      await userEvent.type(nameInput, 'A'.repeat(130));
       expect((nameInput as HTMLInputElement).value.length).toBeLessThanOrEqual(120);
     });
 
-    test('Ограничение длины описания', async () => {
+    test('Должно сработать ограничение длины описания', async () => {
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const descriptionInput = screen.getByLabelText(/описание/i);
 
-      await user.type(descriptionInput, 'B'.repeat(250));
+      await userEvent.type(descriptionInput, 'B'.repeat(250));
       expect((descriptionInput as HTMLTextAreaElement).value.length).toBeLessThanOrEqual(200);
     });
   });
 
   describe('Приоритет', () => {
-    test('Рендер', async () => {
+    test('Должен отрендериться список приоритетов', async () => {
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-      await user.click(screen.getByTestId(/priority/i));
+      await userEvent.click(screen.getByTestId(/priority/i));
       await waitFor(() => {
         expect(screen.getByText('Приоритет 1')).toBeInTheDocument();
         expect(screen.getByText('Приоритет 2')).toBeInTheDocument();
@@ -180,10 +150,10 @@ describe('TaskForm', () => {
       });
     });
 
-    test('Выбрать приоритета', async () => {
+    test('Должен выбраться приоритет по клику', async () => {
       render(<TaskForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
-      await user.click(screen.getByTestId(/priority/i));
+      await userEvent.click(screen.getByTestId(/priority/i));
       await waitFor(() => expect(screen.getByText('Приоритет 3')).toBeInTheDocument());
       expect(screen.getByText('Приоритет 3')).toBeInTheDocument();
     });

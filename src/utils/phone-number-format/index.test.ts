@@ -2,7 +2,7 @@ import { phoneNumberFormat } from '.';
 
 describe('phoneNumberFormat', () => {
   describe('Базовые случаи', () => {
-    test('С плюсом', () => {
+    test('Должен вернуть номер с плюсом', () => {
       const mask = '+0 (000) 000-00-00';
       const phone = '79161234567';
       const result = phoneNumberFormat(mask, phone);
@@ -10,7 +10,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('+7 (916) 123-45-67');
     });
 
-    test('Без плюса', () => {
+    test('Должен вернуть номер без плюса', () => {
       const mask = '0 (000) 000-00-00';
       const phone = '91612345678';
       const result = phoneNumberFormat(mask, phone);
@@ -20,7 +20,7 @@ describe('phoneNumberFormat', () => {
   });
 
   describe('Неполные номера', () => {
-    test('Недостающие цифры -> подчеркивания', () => {
+    test('Должен заменить недостающие цифры - подчеркиванием', () => {
       const mask = '+0 (000) 000-00-00';
       const phone = '79161';
       const result = phoneNumberFormat(mask, phone);
@@ -28,7 +28,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('+7 (916) 1__-__-__');
     });
 
-    test('Пустая строка', () => {
+    test('Должен заменить недостающие цифры (Пустая строка) - подчеркиванием', () => {
       const mask = '+0 (000) 000-00-00';
       const phone = '';
       const result = phoneNumberFormat(mask, phone);
@@ -38,7 +38,7 @@ describe('phoneNumberFormat', () => {
   });
 
   describe('Длинные номера', () => {
-    test('должен использовать только нужное количество цифр', () => {
+    test('Должен использовать только нужное количество цифр', () => {
       const mask = '+0 (000) 000-00-00';
       const phone = '791612345678901234';
       const result = phoneNumberFormat(mask, phone);
@@ -46,7 +46,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('+7 (916) 123-45-67');
     });
 
-    test('Лишние цифры', () => {
+    test('Должен использовать только нужное количество цифр (короткий номер)', () => {
       const mask = '000-00';
       const phone = '123456789';
       const result = phoneNumberFormat(mask, phone);
@@ -56,7 +56,7 @@ describe('phoneNumberFormat', () => {
   });
 
   describe('Форматы масок', () => {
-    test('Простая', () => {
+    test('Должен корректно заменять символы (простая)', () => {
       const mask = '0000000000';
       const phone = '1234567890';
       const result = phoneNumberFormat(mask, phone);
@@ -64,7 +64,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('1234567890');
     });
 
-    test('Без нулей', () => {
+    test('Должен корректно заменять символы (без нулей)', () => {
       const mask = '+ () -';
       const phone = '';
       const result = phoneNumberFormat(mask, phone);
@@ -72,7 +72,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('+ () -');
     });
 
-    test('Сохраняет все кроме нулей', () => {
+    test('Должен сохранить все кроме нулей', () => {
       const mask = '+0 (000) 000-00-00 [доб. 000]';
       const phone = '79161234567123';
       const result = phoneNumberFormat(mask, phone);
@@ -80,7 +80,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('+7 (916) 123-45-67 [доб. 123]');
     });
 
-    test('Пустая маска', () => {
+    test('Должен вернуть пустую строку (пустая маска)', () => {
       const mask = '';
       const phone = '1234567890';
       const result = phoneNumberFormat(mask, phone);
@@ -88,7 +88,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('');
     });
 
-    test('Пустой номер', () => {
+    test('Должен вернуть пустую строку (пустой номер)', () => {
       const mask = '+0 (000) 000-00-00';
       const phone = '';
       const result = phoneNumberFormat(mask, phone);
@@ -96,7 +96,7 @@ describe('phoneNumberFormat', () => {
       expect(result).toBe('+_ (___) ___-__-__');
     });
 
-    test('Длинная маска', () => {
+    test('Должен корректно заменять символы (длинная маска)', () => {
       const mask = '0'.repeat(100);
       const phone = '1'.repeat(50);
       const result = phoneNumberFormat(mask, phone);
@@ -105,7 +105,7 @@ describe('phoneNumberFormat', () => {
       expect(result.slice(50, 100)).toBe('_'.repeat(50));
     });
 
-    test('Длинный номер', () => {
+    test('Должен корректно заменять символы (длинный номер)', () => {
       const mask = '000-000';
       const phone = '1'.repeat(100);
       const result = phoneNumberFormat(mask, phone);
@@ -115,7 +115,7 @@ describe('phoneNumberFormat', () => {
   });
 
   describe('Специальные символы', () => {
-    test('Сохраняет все кроме нуля', () => {
+    test('Должен сохранить все кроме нулей', () => {
       const mask = '0!0@0#0$0%0^0&0*0(0)0';
       const phone = '12345678901';
       const result = phoneNumberFormat(mask, phone);

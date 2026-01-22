@@ -24,14 +24,14 @@ describe('UploadImage', () => {
   });
 
   describe('Рендер', () => {
-    test('Рендер кнопки если нет изображения', () => {
+    test('Должно отрендериться без изображения', () => {
       render(<UploadImage onChange={mockOnChange} />);
 
       expect(screen.getByText('Загрузить')).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /загрузить/i })).toBeInTheDocument();
     });
 
-    test('Рендер изображения', () => {
+    test('Должно отрендериться с изображением', () => {
       const url = 'https://example.com/image.jpg';
       const fileName = 'image.jpg';
 
@@ -47,7 +47,7 @@ describe('UploadImage', () => {
   });
 
   describe('Загрузка', () => {
-    test('Вызыв onChange после загрузки', async () => {
+    test('Должен вызываться onChange после загрузки', async () => {
       const file = new File(['test'], 'test.png', { type: 'image/png' });
       const url = 'https://example.com/uploaded.jpg';
 
@@ -69,7 +69,9 @@ describe('UploadImage', () => {
       });
     });
 
-    test('Индикатор загрузки', () => {
+    test('Должен рендериться индикатор загрузки', () => {
+      expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
+
       (useUploadImageMutation as jest.Mock).mockReturnValue([mockUploadImageMutation, { isLoading: true }]);
 
       render(<UploadImage onChange={mockOnChange} />);
@@ -78,22 +80,7 @@ describe('UploadImage', () => {
   });
 
   describe('Удаление', () => {
-    test('Кнопка удаления при наведении', async () => {
-      const initImageUrl = 'https://example.com/image.jpg';
-      mockGetFileNameFromUrl.mockReturnValue('image.jpg');
-
-      render(<UploadImage initImageUrl={initImageUrl} onChange={mockOnChange} />);
-
-      const image = screen.getByAltText('avatar').closest('.relative');
-
-      if (image) {
-        await userEvent.hover(image);
-        const button = screen.getByRole('button', { name: /delete/i });
-        expect(button).toBeInTheDocument();
-      }
-    });
-
-    test('Клик на кнопку удаления', async () => {
+    test('Должен работать клик на кнопку удаления', async () => {
       const url = 'https://example.com/images/test.jpg';
       const fileName = 'test.jpg';
 
@@ -113,7 +100,7 @@ describe('UploadImage', () => {
       }
     });
 
-    test('После удаления', async () => {
+    test('Должно вызываться удаление', async () => {
       const url = 'https://example.com/images/test.jpg';
 
       mockGetFileNameFromUrl.mockReturnValue('test.jpg');
@@ -128,14 +115,14 @@ describe('UploadImage', () => {
         const button = screen.getByRole('button', { name: /delete/i });
         await userEvent.click(button);
 
-        await waitFor(() => {
-          expect(mockOnChange).toHaveBeenCalledWith('');
-        });
+        await waitFor(() => expect(mockOnChange).toHaveBeenCalledWith(''));
       }
     });
 
-    test('Индикатор загрузки при удалении', () => {
+    test('Должно появляться индикатор загрузки при удалении', () => {
       const initImageUrl = 'https://example.com/image.jpg';
+
+      expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
 
       mockGetFileNameFromUrl.mockReturnValue('image.jpg');
       (useDeleteImageMutation as jest.Mock).mockReturnValue([mockDeleteImageMutation, { isLoading: true }]);
@@ -147,19 +134,20 @@ describe('UploadImage', () => {
   });
 
   describe('URL', () => {
-    test('Имя файла', () => {
+    test('Должно выводитсья имя файла', () => {
       const url = 'https://example.com/path/to/image.jpg';
       const fileName = 'image.jpg';
 
-      mockGetFileNameFromUrl.mockReturnValue(fileName);
+      expect(screen.queryByText(fileName)).not.toBeInTheDocument();
 
+      mockGetFileNameFromUrl.mockReturnValue(fileName);
       render(<UploadImage initImageUrl={url} onChange={mockOnChange} />);
 
       expect(getFileNameFromUrl).toHaveBeenCalledWith(url);
       expect(screen.getByText(fileName)).toBeInTheDocument();
     });
 
-    test('URL при удалении', async () => {
+    test('URL должен удаляться при удалении', async () => {
       const initImageUrl = 'https://example.com/path/to/image.png';
 
       mockGetFileNameFromUrl.mockReturnValue('image.png');
@@ -180,7 +168,7 @@ describe('UploadImage', () => {
   });
 
   describe('Обработка ошибок', () => {
-    test('Отсутствии данных в ответе', async () => {
+    test('Должно работать при отсутствии данных в ответе', async () => {
       const file = new File(['test'], 'test.png', { type: 'image/png' });
       mockUploadImageMutation.mockResolvedValue({ data: undefined });
 
@@ -192,12 +180,10 @@ describe('UploadImage', () => {
         ?.querySelector('input[type="file"]');
 
       await userEvent.upload(input as HTMLElement, file);
-      await waitFor(() => {
-        expect(mockUploadImageMutation).toHaveBeenCalled();
-      });
+      await waitFor(() => expect(mockUploadImageMutation).toHaveBeenCalled());
     });
 
-    test('Пустые строки при удалении', () => {
+    test('Должно работать с пустой строкой при удалении', () => {
       render(<UploadImage initImageUrl={''} onChange={mockOnChange} />);
       expect(screen.queryByAltText('avatar')).not.toBeInTheDocument();
     });

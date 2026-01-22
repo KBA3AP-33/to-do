@@ -5,15 +5,9 @@ const ls = (() => {
   let store: Record<string, string> = {};
   return {
     getItem: jest.fn((key: string) => store[key] || null),
-    setItem: jest.fn((key: string, value: string) => {
-      store[key] = value.toString();
-    }),
-    removeItem: jest.fn((key: string) => {
-      delete store[key];
-    }),
-    clear: jest.fn(() => {
-      store = {};
-    }),
+    setItem: jest.fn((key: string, value: string) => (store[key] = value.toString())),
+    removeItem: jest.fn((key: string) => delete store[key]),
+    clear: jest.fn(() => (store = {})),
   };
 })();
 
@@ -28,7 +22,7 @@ describe('Tokens', () => {
   });
 
   describe('getTokens', () => {
-    test('Токенов нету в ls', () => {
+    test('Должен проверь есть ли токены в ls', () => {
       const result = Tokens.getTokens();
 
       expect(result).toEqual({ accessToken: null, refreshToken: null });
@@ -37,7 +31,7 @@ describe('Tokens', () => {
       expect(ls.getItem).toHaveBeenCalledWith(REFRESH_TOKEN);
     });
 
-    test('возвращает токены из ls', () => {
+    test('Должен вернуть токены из ls', () => {
       ls.setItem(ACCESS_TOKEN, 'access-token');
       ls.setItem(REFRESH_TOKEN, 'refresh-token');
 
@@ -49,7 +43,7 @@ describe('Tokens', () => {
       });
     });
 
-    test('Нету refresh токена', () => {
+    test('Должен вернуть токены access токен', () => {
       ls.setItem(ACCESS_TOKEN, 'access-token');
 
       const result = Tokens.getTokens();
@@ -62,14 +56,14 @@ describe('Tokens', () => {
   });
 
   describe('setTokens', () => {
-    test('Access токен', () => {
+    test('Должен сохранить access токен в ls', () => {
       Tokens.setTokens('new-access-token');
 
       expect(ls.setItem).toHaveBeenCalledWith(ACCESS_TOKEN, 'new-access-token');
       expect(ls.setItem).not.toHaveBeenCalledWith(REFRESH_TOKEN);
     });
 
-    test('Access и Refresh токены', () => {
+    test('Должен сохранить access и refresh токены в ls', () => {
       Tokens.setTokens('new-access-token', 'new-refresh-token');
 
       expect(ls.setItem).toHaveBeenCalledWith(ACCESS_TOKEN, 'new-access-token');
@@ -77,7 +71,7 @@ describe('Tokens', () => {
       expect(ls.setItem).toHaveBeenCalledTimes(2);
     });
 
-    test('Перезаписываем токены', () => {
+    test('Должен перезаписать токены', () => {
       ls.setItem(ACCESS_TOKEN, 'old-access');
       ls.setItem(REFRESH_TOKEN, 'old-refresh');
 
@@ -89,7 +83,7 @@ describe('Tokens', () => {
   });
 
   describe('clearTokens', () => {
-    test('Удаляем из ls', () => {
+    test('Должен удалить токены из ls', () => {
       ls.setItem(ACCESS_TOKEN, 'access-token');
       ls.setItem(REFRESH_TOKEN, 'refresh-token');
 
@@ -102,7 +96,7 @@ describe('Tokens', () => {
   });
 
   describe('Интеграционные тесты', () => {
-    test('Установка, получение, очистка', () => {
+    test('Должен установить токен, получить его и очистить ls', () => {
       Tokens.setTokens('access-token', 'refresh-token');
 
       let tokens = Tokens.getTokens();

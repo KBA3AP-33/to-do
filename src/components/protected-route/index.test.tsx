@@ -17,7 +17,7 @@ describe('ProtectedRoute', () => {
     jest.clearAllMocks();
   });
 
-  test('loader', () => {
+  test('Должен отрендериться loader', () => {
     mockUseSelector.mockReturnValue({ isLoading: true, user: null });
 
     render(
@@ -29,7 +29,7 @@ describe('ProtectedRoute', () => {
     expect(screen.getByTestId('loader')).toBeInTheDocument();
   });
 
-  test('children', () => {
+  test('Должен отрендериться children', () => {
     mockUseSelector.mockReturnValue({
       isLoading: false,
       user: { id: '1', email: 'test@m.ru' },
@@ -44,7 +44,7 @@ describe('ProtectedRoute', () => {
     expect(screen.getByTestId('children')).toBeInTheDocument();
   });
 
-  test('redirect', () => {
+  test('Должен произойти редирект', () => {
     mockUseSelector.mockReturnValue({ isLoading: false, user: null });
 
     const { container } = render(

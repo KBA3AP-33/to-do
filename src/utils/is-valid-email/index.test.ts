@@ -2,13 +2,13 @@ import { isValidEmail } from '.';
 import { REGEX_EMAIL } from '@src/consts';
 
 describe('REGEX_EMAIL', () => {
-  test('Валидные', () => {
+  test('Должен вернуть true - Валидные', () => {
     expect(REGEX_EMAIL.test('test@example.com')).toBe(true);
     expect(REGEX_EMAIL.test('user.name@domain.co')).toBe(true);
     expect(REGEX_EMAIL.test('user_name@domain.org')).toBe(true);
   });
 
-  test('Невалидные', () => {
+  test('Должен вернуть false - Невалидные', () => {
     expect(REGEX_EMAIL.test('invalid-email')).toBe(false);
     expect(REGEX_EMAIL.test('@domain.com')).toBe(false);
     expect(REGEX_EMAIL.test('user@')).toBe(false);
@@ -16,7 +16,7 @@ describe('REGEX_EMAIL', () => {
 });
 
 describe('isValidEmail', () => {
-  describe('Валидные', () => {
+  describe('Должен вернуть true - Валидные', () => {
     const validEmails = [
       'simple@example.com',
       'very.common@example.com',
@@ -55,7 +55,7 @@ describe('isValidEmail', () => {
     });
   });
 
-  describe('Невалидные', () => {
+  describe('Должен вернуть false - Невалидные', () => {
     const invalidEmails = [
       'email.example.com',
       'A@b@c@example.com',
@@ -83,19 +83,19 @@ describe('isValidEmail', () => {
   });
 
   describe('С пробелами', () => {
-    test('Пробелы', () => {
+    test('Должен корректно работать с пробелами', () => {
       expect(isValidEmail('  test@example.com  ')).toBe(true);
       expect(isValidEmail('\ttest@example.com\n')).toBe(true);
       expect(isValidEmail(' \n test@example.com \t ')).toBe(true);
     });
 
-    test('Пустые', () => {
+    test('Должен корректно работать с пустыми строками', () => {
       expect(isValidEmail('')).toBe(false);
       expect(isValidEmail('   ')).toBe(false);
       expect(isValidEmail('\t\n')).toBe(false);
     });
 
-    test('С заглавными', () => {
+    test('Должен корректно работать с заглавными буквами', () => {
       expect(isValidEmail('test@EXAMPLE.COM')).toBe(true);
       expect(isValidEmail('test@Example.Com')).toBe(true);
       expect(isValidEmail('TEST@example.com')).toBe(true);

@@ -4,7 +4,7 @@ describe('isValidPassword', () => {
   const { empty, minLength, requireUppercase, requireLowercase, requireNumbers, maxLength } = errorsText;
 
   describe('Валидные', () => {
-    test('Корректный пароль', () => {
+    test('Должен не возвращать ошибок', () => {
       expect(isValidPassword('Password123')).toEqual([]);
       expect(isValidPassword('Пароль123')).toEqual([]);
       expect(isValidPassword('Pass1234')).toEqual([]);
@@ -13,32 +13,32 @@ describe('isValidPassword', () => {
   });
 
   describe('Невалидные', () => {
-    test('Пустой пароль', () => {
+    test('Должен вернуть все ошибки', () => {
       expect(isValidPassword('')).toEqual([empty, minLength, requireUppercase, requireLowercase, requireNumbers]);
       expect(isValidPassword('   ')).toEqual([empty, minLength, requireUppercase, requireLowercase, requireNumbers]);
     });
 
-    test('Короткий пароль', () => {
+    test('Должен вернуть ошибку - Короткий пароль', () => {
       expect(isValidPassword('Pass12')).toEqual([minLength]);
     });
 
-    test('Длинный пароль', () => {
+    test('Должен вернуть ошибку - Длинный пароль', () => {
       expect(isValidPassword('A'.repeat(101) + 'a1')).toEqual([maxLength]);
     });
 
-    test('Без заглавных', () => {
+    test('Должен вернуть ошибку - Без заглавных', () => {
       expect(isValidPassword('password123')).toEqual([requireUppercase]);
     });
 
-    test('Без строчных', () => {
+    test('Должен вернуть ошибку - Без строчных', () => {
       expect(isValidPassword('PASSWORD123')).toEqual([requireLowercase]);
     });
 
-    test('Без цифр', () => {
+    test('Должен вернуть ошибку - Без цифр', () => {
       expect(isValidPassword('Password')).toEqual([requireNumbers]);
     });
 
-    test('Только цифры', () => {
+    test('Должен вернуть ошибку - Только цифры и Без строчных', () => {
       expect(isValidPassword('12345678')).toEqual([requireUppercase, requireLowercase]);
     });
   });

@@ -25,7 +25,7 @@ describe('useNotifyEdit', () => {
   });
 
   describe('Init state', () => {
-    test('Дефолтное состояние', () => {
+    test('Должен созтаться с дефолтным состоянием', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
 
       expect(result.current.editing).toBeNull();
@@ -34,14 +34,14 @@ describe('useNotifyEdit', () => {
       expect(typeof result.current.notifyEnd).toBe('function');
     });
 
-    test('Корректные аргументы', () => {
+    test('Должен созтаться с определенными аргументами', () => {
       renderHook(() => useNotifyEdit(channelName));
       expect(mockUseBroadcastChannel).toHaveBeenCalledWith(channelName, expect.any(Function));
     });
   });
 
   describe('Отправка сообщений', () => {
-    test('START', () => {
+    test('Должно корректно отрабатать при START message', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
 
       const messageHandler = mockUseBroadcastChannel.mock.calls[0][1];
@@ -56,7 +56,7 @@ describe('useNotifyEdit', () => {
       expect(result.current.editing).toEqual({ id1: 2, id2: 1 });
     });
 
-    test('END', () => {
+    test('Должно корректно отрабатать при END message', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
       const messageHandler = mockUseBroadcastChannel.mock.calls[0][1];
 
@@ -77,7 +77,7 @@ describe('useNotifyEdit', () => {
       mockOmit.mockReturnValueOnce({ id2: 1 });
     });
 
-    test('Удаление id', () => {
+    test('Должно удалиться id', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
       const messageHandler = mockUseBroadcastChannel.mock.calls[0][1];
 
@@ -88,7 +88,7 @@ describe('useNotifyEdit', () => {
       expect(mockOmit).toHaveBeenCalledWith({ id: 1 }, ['id']);
     });
 
-    test('UNKNOWN', () => {
+    test('Должно корректно отрабатать при UNKNOWN message', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
       const messageHandler = mockUseBroadcastChannel.mock.calls[0][1];
 
@@ -98,7 +98,7 @@ describe('useNotifyEdit', () => {
       expect(result.current.editing).toBe(initialState);
     });
 
-    test('ref', () => {
+    test('Должна работать ссылка - ref', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
 
       expect(result.current.ref.current).toBeNull();
@@ -109,21 +109,21 @@ describe('useNotifyEdit', () => {
   });
 
   describe('notifyStart & notifyEnd', () => {
-    test('START', () => {
+    test('Должно корректно отрабатать notifyStart', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
 
       act(() => result.current.notifyStart('id'));
       expect(mockPostMessage).toHaveBeenCalledWith({ type: Messages.START, id: 'id' });
     });
 
-    test('END', () => {
+    test('Должно корректно отрабатать notifyEnd', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
 
       act(() => result.current.notifyEnd('id'));
       expect(mockPostMessage).toHaveBeenCalledWith({ type: Messages.END, id: 'id' });
     });
 
-    test('Мемоизация', () => {
+    test('Должна работать мемоизация', () => {
       const { result, rerender } = renderHook(() => useNotifyEdit(channelName));
 
       const startNotifyStart = result.current.notifyStart;
@@ -150,17 +150,17 @@ describe('useNotifyEdit', () => {
       removeEventListenerSpy.mockRestore();
     });
 
-    test('mount', () => {
+    test('Должен работать mount', () => {
       renderHook(() => useNotifyEdit(channelName));
       expect(addEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
     });
 
-    test('unmount', () => {
+    test('Должен работать unmount', () => {
       renderHook(() => useNotifyEdit(channelName)).unmount();
       expect(removeEventListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
     });
 
-    test('notifyEnd - вызывается', () => {
+    test('Должен вызываться notifyEnd', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
 
       act(() => (result.current.ref.current = 'id'));
@@ -172,7 +172,7 @@ describe('useNotifyEdit', () => {
       expect(mockPostMessage).toHaveBeenCalledWith({ type: Messages.END, id: 'id' });
     });
 
-    test('notifyEnd - не вызывается', () => {
+    test('Должен не вызываться notifyEnd', () => {
       const { result } = renderHook(() => useNotifyEdit(channelName));
 
       expect(result.current.ref.current).toBeNull();
@@ -185,7 +185,7 @@ describe('useNotifyEdit', () => {
   });
 
   describe('Edge cases', () => {
-    test('Несколько каналов', () => {
+    test('Должен работать с несколькими каналами', () => {
       const channel1 = 'channel1';
       const channel2 = 'channel2';
 
@@ -204,7 +204,7 @@ describe('useNotifyEdit', () => {
       expect(result2.current.editing).toBeNull();
     });
 
-    test('Разные postMessage', () => {
+    test('Должен работать с разными postMessage', () => {
       const newPostMessage = jest.fn();
       mockUseBroadcastChannel.mockReturnValue({
         postMessage: newPostMessage,
@@ -218,7 +218,7 @@ describe('useNotifyEdit', () => {
   });
 
   describe('Производительность', () => {
-    test('Ререндер функций - новые не создаются', () => {
+    test('Новые функции не должны создаваться', () => {
       const { result, rerender } = renderHook(() => useNotifyEdit(channelName));
 
       const initialNotifyStart = result.current.notifyStart;

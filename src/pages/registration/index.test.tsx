@@ -1,12 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { RegistrationPage } from '.';
 import userEvent from '@testing-library/user-event';
-
-global.ResizeObserver = jest.fn(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+import { TestHelper } from '@src/__tests__/utils';
 
 jest.mock('react-redux', () => ({
   useSelector: () => ({ isLoadingApi: false }),
@@ -33,85 +28,66 @@ jest.mock('@src/store/auth/slice', () => ({
   },
 }));
 
-// jest.mock('./ThemeContext', () => ({
-//   useTheme: () => ({
-//     theme: 'light',
-//     toggleTheme: jest.fn(),
-//   }),
-// }));
+describe('RegistrationPage', () => {
+  describe('Рендер', () => {
+    test('Должна отрендериться форма', () => {
+      render(<RegistrationPage />);
 
-describe('Рендер', () => {
-  test('Рендер формы', () => {
-    render(<RegistrationPage />);
+      expect(screen.getByText('Создать аккаунт')).toBeInTheDocument();
 
-    expect(screen.getByText('Создать аккаунт')).toBeInTheDocument();
+      expect(screen.getByLabelText('Email')).toBeInTheDocument();
+      expect(screen.getByLabelText('Пароль')).toBeInTheDocument();
+      expect(screen.getByLabelText('Повторите пароль')).toBeInTheDocument();
 
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Пароль')).toBeInTheDocument();
-    expect(screen.getByLabelText('Повторите пароль')).toBeInTheDocument();
+      expect(screen.getByText('Зарегистрироваться')).toBeInTheDocument();
+      expect(screen.getByText('Уже есть аккаунт?')).toBeInTheDocument();
 
-    expect(screen.getByText('Зарегистрироваться')).toBeInTheDocument();
-  });
-});
-
-describe('Форма', () => {
-  test('Ошибока валидации - форма не отправлена', async () => {
-    const user = userEvent.setup();
-
-    render(<RegistrationPage />);
-
-    const email = screen.getByLabelText('Email');
-    await user.type(email, 'invalid-email');
-
-    const password = screen.getByLabelText('Пароль');
-    await user.type(password, 'Password123');
-
-    const passwordConfirm = screen.getByLabelText('Повторите пароль');
-    await user.type(passwordConfirm, 'Password123');
-
-    const button = screen.getByText('Зарегистрироваться');
-    await user.click(button);
-
-    await waitFor(() => {
-      expect(mockDispatch).not.toHaveBeenCalled();
+      const loginLink = screen.getByText('Войти').closest('a');
+      expect(loginLink).toBeInTheDocument();
+      expect(loginLink).toHaveAttribute('to', '/login');
     });
   });
 
-  test('Форма отправлена', async () => {
-    const user = userEvent.setup();
+  describe('Форма', () => {
+    test('Ошибока валидации - форма не отправлена', async () => {
+      const user = userEvent.setup();
 
-    render(<RegistrationPage />);
+      render(<RegistrationPage />);
 
-    const email = screen.getByLabelText('Email');
-    await user.type(email, 'test2@m.ru');
+      await TestHelper.fill.input('Email', 'invalid-email');
+      await TestHelper.fill.input('Пароль', 'Password123');
+      await TestHelper.fill.input('Повторите пароль', 'Password123');
 
-    const password = screen.getByLabelText('Пароль');
-    await user.type(password, 'Password123');
+      const button = screen.getByText('Зарегистрироваться');
+      await userEvent.click(button);
 
-    const passwordConfirm = screen.getByLabelText('Повторите пароль');
-    await user.type(passwordConfirm, 'Password123');
+      await waitFor(() => expect(mockDispatch).not.toHaveBeenCalled());
+    });
 
-    const button = screen.getByText('Зарегистрироваться');
-    await user.click(button);
+    test('Форма должна быть отправлена', async () => {
+      render(<RegistrationPage />);
 
-    await waitFor(() => {
-      expect(mockRegisterApi).toHaveBeenCalledWith({
-        email: 'test2@m.ru',
-        password: 'Password123',
-        passwordConfirm: 'Password123',
+      await TestHelper.fill.input('Email', 'test2@m.ru');
+      await TestHelper.fill.input('Пароль', 'Password123');
+      await TestHelper.fill.input('Повторите пароль', 'Password123');
+      await TestHelper.form.submit(
+        'Зарегистрироваться',
+        mockRegisterApi,
+        expect.objectContaining({
+          email: 'test2@m.ru',
+          password: 'Password123',
+        })
+      );
+    });
+
+    test('Дожен быть редирект после успешной регистрации', async () => {
+      mockDispatch.mockImplementation(async action => {
+        if (typeof action === 'function') {
+          action(mockDispatch);
+          return Promise.resolve().then(() => mockNavigate('/projects'));
+        }
+        return Promise.resolve();
       });
-    });
-  });
-
-  test('После успешной регистрации', async () => {
-    mockDispatch.mockImplementation(async action => {
-      if (typeof action === 'function') {
-        action(mockDispatch);
-        return Promise.resolve().then(() => {
-          mockNavigate('/projects');
-        });
-      }
-      return Promise.resolve();
     });
   });
 });

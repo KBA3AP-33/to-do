@@ -10,7 +10,7 @@ jest.mock('../plural', () => ({
 
 describe('getRemainingTime', () => {
   describe('Интервалы', () => {
-    test('Года', () => {
+    test('Должен корректно расчитывать года', () => {
       const now = dayjs().year(2025);
       const date = dayjs().year(2028).toISOString();
 
@@ -18,7 +18,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 3 года');
     });
 
-    test('Дни', () => {
+    test('Должен корректно расчитывать дни', () => {
       const now = dayjs().year(2025).month(0).date(5);
       const date = dayjs().year(2025).month(0).date(15).toISOString();
 
@@ -26,7 +26,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 10 дней');
     });
 
-    test('Часы', () => {
+    test('Должен корректно расчитывать часы', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12);
       const date = dayjs().year(2025).month(0).date(5).hour(22).toISOString();
 
@@ -34,7 +34,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 10 часов');
     });
 
-    test('Осталось менее часа', () => {
+    test('Должен корректно расчитывать часы (осталось менее часа)', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12).minute(20);
       const date = dayjs().year(2025).month(0).date(5).hour(12).minute(30).toISOString();
 
@@ -42,7 +42,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось менее часа');
     });
 
-    test('Время истекло', () => {
+    test('Должен корректно выводить время истекло', () => {
       const now = dayjs().year(2026);
       const date = dayjs().year(2025).toISOString();
 
@@ -52,7 +52,7 @@ describe('getRemainingTime', () => {
   });
 
   describe('plural', () => {
-    test('1 год', () => {
+    test('Должен корректно выводить - 1 год', () => {
       const now = dayjs().year(2025);
       const date = dayjs().year(2026).toISOString();
 
@@ -60,7 +60,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Остался 1 год');
     });
 
-    test('2 года', () => {
+    test('Должен корректно выводить - 2 года', () => {
       const now = dayjs().year(2025);
       const date = dayjs().year(2027).toISOString();
 
@@ -68,7 +68,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 2 года');
     });
 
-    test('5 лет', () => {
+    test('Должен корректно выводить - 5 лет', () => {
       const now = dayjs().year(2025);
       const date = dayjs().year(2030).toISOString();
 
@@ -76,7 +76,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 5 лет');
     });
 
-    test('1 день', () => {
+    test('Должен корректно выводить - 1 день', () => {
       const now = dayjs().year(2025).month(0).date(5);
       const date = dayjs().year(2025).month(0).date(6).toISOString();
 
@@ -84,7 +84,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Остался 1 день');
     });
 
-    test('2 дня', () => {
+    test('Должен корректно выводить - 2 дня', () => {
       const now = dayjs().year(2025).month(0).date(5);
       const date = dayjs().year(2025).month(0).date(7).toISOString();
 
@@ -92,7 +92,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 2 дня');
     });
 
-    test('5 дней', () => {
+    test('Должен корректно выводить - 5 дней', () => {
       const now = dayjs().year(2025).month(0).date(5);
       const date = dayjs().year(2025).month(0).date(10).toISOString();
 
@@ -100,7 +100,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 5 дней');
     });
 
-    test('1 час', () => {
+    test('Должен корректно выводить - 1 час', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12);
       const date = dayjs().year(2025).month(0).date(5).hour(13).toISOString();
 
@@ -108,7 +108,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Остался 1 час');
     });
 
-    test('2 час', () => {
+    test('Должен корректно выводить - 2 час', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12);
       const date = dayjs().year(2025).month(0).date(5).hour(14).toISOString();
 
@@ -116,7 +116,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось 2 часа');
     });
 
-    test('5 часов', () => {
+    test('Должен корректно выводить - 5 часов', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12);
       const date = dayjs().year(2025).month(0).date(5).hour(17).toISOString();
 
@@ -126,7 +126,7 @@ describe('getRemainingTime', () => {
   });
 
   describe('Граничные случаи', () => {
-    test('Точное совпадение времени', () => {
+    test('Должен корректно сработать при точном совпадение времени', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12).minute(30).second(45).millisecond(500);
       const date = dayjs().year(2025).month(0).date(5).hour(12).minute(30).second(45).millisecond(500).toISOString();
 
@@ -134,7 +134,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось менее часа');
     });
 
-    test('59 минут', () => {
+    test('Должен корректно сработать при - 59 минут', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12).minute(30);
       const date = dayjs().year(2025).month(0).date(5).hour(13).minute(29).toISOString();
 
@@ -142,7 +142,7 @@ describe('getRemainingTime', () => {
       expect(result).toBe('Осталось менее часа');
     });
 
-    test('60+ минут', () => {
+    test('Должен корректно сработать при - 60+ минут', () => {
       const now = dayjs().year(2025).month(0).date(5).hour(12).minute(30);
       const date = dayjs().year(2025).month(0).date(5).hour(13).minute(31).toISOString();
 

@@ -37,7 +37,7 @@ describe('ThemeProvider', () => {
   });
 
   describe('Init state', () => {
-    test('Дефолтная тема', () => {
+    test('Должна использоваться дефолтная тема', () => {
       render(
         <ThemeProvider>
           <Test />
@@ -47,7 +47,7 @@ describe('ThemeProvider', () => {
       expect(screen.getByTestId('theme')).toHaveTextContent('light');
     });
 
-    test('Init из localStorage', () => {
+    test('Должна использоваться тема из localStorage', () => {
       localStorage.setItem(THEME_KEY, 'dark');
 
       render(
@@ -59,7 +59,7 @@ describe('ThemeProvider', () => {
       expect(screen.getByTestId('theme')).toHaveTextContent('dark');
     });
 
-    test('Атрибут data-theme', () => {
+    test('Должна быть атрибут data-theme', () => {
       render(
         <ThemeProvider>
           <div>Test</div>
@@ -69,7 +69,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
 
-    test('Init', () => {
+    test('Должно работать с Init', () => {
       const results: Array<ThemeContextType> = [];
 
       const Test = () => {
@@ -95,7 +95,7 @@ describe('ThemeProvider', () => {
   });
 
   describe('Переключение тем', () => {
-    test('light -> dark', async () => {
+    test('Должно работать light -> dark', async () => {
       render(
         <ThemeProvider>
           <Test />
@@ -109,7 +109,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     });
 
-    test('dark -> light', async () => {
+    test('Должно работать dark -> light', async () => {
       localStorage.setItem('theme', 'dark');
 
       render(
@@ -125,7 +125,7 @@ describe('ThemeProvider', () => {
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
 
-    test('Сохранение в localStorage', async () => {
+    test('Должно работать сохранение в localStorage', async () => {
       render(
         <ThemeProvider>
           <Test />

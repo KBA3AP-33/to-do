@@ -1,12 +1,7 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { LoginPage } from '.';
 import userEvent from '@testing-library/user-event';
-
-global.ResizeObserver = jest.fn(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+import { TestHelper } from '@src/__tests__/utils';
 
 jest.mock('react-redux', () => ({
   useSelector: () => ({ isLoadingApi: false }),
@@ -33,85 +28,71 @@ jest.mock('@src/store/auth/slice', () => ({
   },
 }));
 
-// jest.mock('./ThemeContext', () => ({
-//   useTheme: () => ({
-//     theme: 'light',
-//     toggleTheme: jest.fn(),
-//   }),
-// }));
+describe('LoginPage', () => {
+  describe('Рендер', () => {
+    test('Должна отрендериться форма', () => {
+      render(<LoginPage />);
 
-describe('Рендер', () => {
-  test('Рендер формы', () => {
-    render(<LoginPage />);
+      expect(screen.getByText('Добро пожаловать')).toBeInTheDocument();
+      expect(screen.getByText('Войдите в свой аккаунт')).toBeInTheDocument();
 
-    expect(screen.getByText('Добро пожаловать')).toBeInTheDocument();
+      expect(screen.getByLabelText('Email')).toBeInTheDocument();
+      expect(screen.getByLabelText('Пароль')).toBeInTheDocument();
 
-    expect(screen.getByPlaceholderText('Введите email')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Введите пароль')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Войти' })).toBeInTheDocument();
+      expect(screen.getByText('Нет аккаунта?')).toBeInTheDocument();
+      expect(screen.getByText('Вернуться')).toBeInTheDocument();
 
-    expect(screen.getByRole('button', { name: 'Войти' })).toBeInTheDocument();
-  });
-});
+      const regLink = screen.getByText('Зарегистрироваться').closest('a');
+      expect(regLink).toBeInTheDocument();
+      expect(regLink).toHaveAttribute('to', '/registration');
 
-describe('Форма', () => {
-  test('Ошибока валидации - форма не отправлена', async () => {
-    const user = userEvent.setup();
-
-    render(<LoginPage />);
-
-    const emailInput = screen.getByPlaceholderText('Введите email');
-    await user.type(emailInput, 'invalid-email');
-
-    const passwordInput = screen.getByPlaceholderText('Введите пароль');
-    await user.type(passwordInput, 'Password123');
-
-    const loginButton = screen.getByRole('button', { name: 'Войти' });
-    await user.click(loginButton);
-
-    await waitFor(() => {
-      expect(mockDispatch).not.toHaveBeenCalled();
+      const mainLink = screen.getByText('На главную').closest('a');
+      expect(mainLink).toBeInTheDocument();
+      expect(mainLink).toHaveAttribute('to', '/');
     });
   });
 
-  test('Форма отправлена', async () => {
-    const user = userEvent.setup();
+  describe('Форма', () => {
+    test('Форма не должна быть отправлена', async () => {
+      render(<LoginPage />);
 
-    render(<LoginPage />);
+      await TestHelper.fill.input('Email', 'invalid-email');
+      await TestHelper.fill.input('Пароль', 'Password123');
 
-    const emailInput = screen.getByLabelText('Email');
-    await user.type(emailInput, 'test@m.ru');
+      const loginButton = screen.getByRole('button', { name: 'Войти' });
+      await userEvent.click(loginButton);
 
-    const passwordInput = screen.getByPlaceholderText('Введите пароль');
-    await user.type(passwordInput, 'Password123');
+      await waitFor(() => expect(mockDispatch).not.toHaveBeenCalled());
+    });
 
-    const loginButton = screen.getByRole('button', { name: 'Войти' });
-    await user.click(loginButton);
+    test('Форма должна быть отправлена', async () => {
+      render(<LoginPage />);
 
-    await waitFor(() => {
-      expect(mockLoginApi).toHaveBeenCalledWith({
+      await TestHelper.fill.input('Email', 'test@m.ru');
+      await TestHelper.fill.input('Пароль', 'Password123');
+      await TestHelper.form.submit('Войти', mockLoginApi, {
         email: 'test@m.ru',
         password: 'Password123',
       });
     });
-  });
 
-  test('После успешного логина', async () => {
-    mockDispatch.mockImplementation(async action => {
-      if (typeof action === 'function') {
-        action(mockDispatch);
-        return Promise.resolve().then(() => {
-          mockNavigate('/projects');
-        });
-      }
-      return Promise.resolve();
+    test('Дожен быть редирект после успешного логина', async () => {
+      mockDispatch.mockImplementation(async action => {
+        if (typeof action === 'function') {
+          action(mockDispatch);
+          return Promise.resolve().then(() => mockNavigate('/projects'));
+        }
+        return Promise.resolve();
+      });
     });
-  });
 
-  test('Snapshot', () => {
-    const { container, getByText } = render(<LoginPage />);
+    test('Snapshot', () => {
+      const { container, getByText } = render(<LoginPage />);
 
-    const button = getByText('Войти');
-    expect(container).toMatchSnapshot('form');
-    expect(button).toMatchSnapshot('button');
+      const button = getByText('Войти');
+      expect(container).toMatchSnapshot('form');
+      expect(button).toMatchSnapshot('button');
+    });
   });
 });

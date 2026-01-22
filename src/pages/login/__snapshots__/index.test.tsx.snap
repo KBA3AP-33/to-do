@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`Форма Snapshot: button 1`] = `
+exports[`LoginPage Форма Snapshot: button 1`] = `
 <span>
   Войти
 </span>
 `;
 
-exports[`Форма Snapshot: form 1`] = `
+exports[`LoginPage Форма Snapshot: form 1`] = `
 <div>
   <div
     class="min-h-screen flex items-center justify-center p-4"

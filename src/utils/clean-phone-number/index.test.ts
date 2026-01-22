@@ -2,7 +2,7 @@ import { cleanPhoneNumber } from '.';
 
 describe('cleanPhoneNumber', () => {
   describe('Базовые номера', () => {
-    test('Удалить все нецифровые символы кроме плюса', () => {
+    test('Должен удалить все нецифровые символы кроме плюса', () => {
       const cases = [
         { input: '+7 (123) 456-78-90', expected: '+71234567890' },
         { input: '8 (123) 456-78-90', expected: '81234567890' },
@@ -17,7 +17,7 @@ describe('cleanPhoneNumber', () => {
       });
     });
 
-    test('Номера без плюса', () => {
+    test('Должен корректно отработать с номерами без плюса', () => {
       const cases = [
         { input: '81234567890', expected: '81234567890' },
         { input: '1234567890', expected: '1234567890' },
@@ -31,20 +31,20 @@ describe('cleanPhoneNumber', () => {
   });
 
   describe('Пустые значения', () => {
-    test('undefined', () => {
+    test('Должен корректно отработать с undefined', () => {
       expect(cleanPhoneNumber(undefined)).toBeUndefined();
     });
 
-    test('Пустая строка', () => {
+    test('Должен корректно отработать с пустой строкой', () => {
       expect(cleanPhoneNumber('')).toBe('');
       expect(cleanPhoneNumber('   ')).toBe('');
     });
 
-    test('null', () => {
+    test('Должен корректно отработать с null', () => {
       expect(cleanPhoneNumber(null as unknown as string)).toBeUndefined();
     });
 
-    test('Нижнее подчеркивание', () => {
+    test('Должен корректно отработать с нижнеим подчеркиванием', () => {
       const cases = [
         '123_456_7890',
         '+7_123_456_78_90',
@@ -61,7 +61,7 @@ describe('cleanPhoneNumber', () => {
       });
     });
 
-    test('Только символы', () => {
+    test('Должен корректно отработать с символами', () => {
       expect(cleanPhoneNumber('abc')).toBe('');
       expect(cleanPhoneNumber('!@#$%^&*()')).toBe('');
       expect(cleanPhoneNumber('  - () ')).toBe('');
@@ -69,14 +69,14 @@ describe('cleanPhoneNumber', () => {
   });
 
   describe('Граничные случаи', () => {
-    test('Длинный номер', () => {
+    test('Должен корректно отработать с длинным номером', () => {
       const longNumber = '+1' + '2'.repeat(50);
       const result = cleanPhoneNumber(longNumber);
 
       expect(result).toBe(longNumber);
     });
 
-    test('Международные форматы', () => {
+    test('Должен корректно отработать с международными форматами', () => {
       const cases = [
         { input: '+1 (234) 567-8900', expected: '+12345678900' },
         { input: '+49 170 1234567', expected: '+491701234567' },

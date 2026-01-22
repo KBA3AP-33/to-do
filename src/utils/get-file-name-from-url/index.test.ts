@@ -2,22 +2,22 @@ import { getFileNameFromUrl } from '.';
 
 describe('getFileNameFromUrl', () => {
   describe('Успешные случаи', () => {
-    test('1 Подчеркивание', () => {
+    test('Должен получить имя файла с 1 подчеркиванием', () => {
       const result = getFileNameFromUrl('id_fileName.png');
       expect(result).toBe('fileName.png');
     });
 
-    test('Много подчеркиваний', () => {
+    test('Должен получить имя файла с большим кол-вом подчеркиваний', () => {
       const result = getFileNameFromUrl('id_my_file_name_v2.png');
       expect(result).toBe('my_file_name_v2.png');
     });
 
-    test('Декодирование символов', () => {
+    test('Должен корректно изменить специальные символов', () => {
       const result = getFileNameFromUrl('id_my%20file%20name.png');
       expect(result).toBe('my file name.png');
     });
 
-    test('Специальные символы', () => {
+    test('Должен корректно сработать с специальными символами', () => {
       const cases = [
         { url: 'id_file%2Fname.png', expected: 'file/name.png' },
         { url: 'id_file%3Fquery.png', expected: 'file?query.png' },
@@ -33,22 +33,22 @@ describe('getFileNameFromUrl', () => {
       });
     });
 
-    test('С точками', () => {
+    test('Должен корректно сработать с точками', () => {
       const result = getFileNameFromUrl('id_file.name.version.2.0.png');
       expect(result).toBe('file.name.version.2.0.png');
     });
 
-    test('С тире', () => {
+    test('Должен корректно сработать с тире', () => {
       const result = getFileNameFromUrl('id_my-file-name.png');
       expect(result).toBe('my-file-name.png');
     });
 
-    test('С размыми символами', () => {
+    test('Должен корректно сработать с размыми символами', () => {
       const result = getFileNameFromUrl('id_file-name_v2.0_final%20release.png');
       expect(result).toBe('file-name_v2.0_final release.png');
     });
 
-    test('Разные расширения', () => {
+    test('Должен корректно сработать с разными расширениями', () => {
       const cases = [
         { url: 'id_file.png', expected: 'file.png' },
         { url: 'id_file.txt', expected: 'file.txt' },
@@ -66,28 +66,28 @@ describe('getFileNameFromUrl', () => {
   });
 
   describe('Граничные случаи', () => {
-    test('Пустая строка', () => {
+    test('Должен корректно сработать с пустой строкой', () => {
       expect(getFileNameFromUrl('')).toBeUndefined();
       expect(getFileNameFromUrl('   ')).toBeUndefined();
     });
 
-    test('undefined', () => {
+    test('Должен корректно сработать с undefined', () => {
       expect(getFileNameFromUrl()).toBeUndefined();
     });
 
-    test('null', () => {
+    test('Должен корректно сработать с null', () => {
       expect(getFileNameFromUrl(null as unknown as string)).toBeUndefined();
     });
 
-    test('Нет подчеркивания', () => {
+    test('Должен корректно сработать с без подчеркивания', () => {
       expect(getFileNameFromUrl('filename.png')).toBeUndefined();
     });
 
-    test('Пустое имя файла', () => {
+    test('Должен корректно сработать с пустым именем файла', () => {
       expect(getFileNameFromUrl('id_')).toBeUndefined();
     });
 
-    test('Длинные имена файлов', () => {
+    test('Должен корректно сработать с длинным именем файла', () => {
       const name = 'a'.repeat(1000) + '.png';
       const result = getFileNameFromUrl(`id_${name}`);
 
