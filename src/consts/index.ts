@@ -15,6 +15,7 @@ export const API_ROUTES = {
   UPLOAD: 'upload',
   PROJECTS: 'projects',
   TASKS: 'tasks',
+  NOTIFICATION: 'notification',
 };
 
 export const QUERY_KEYS = {

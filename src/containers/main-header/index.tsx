@@ -9,6 +9,7 @@ import { BreadCrumbNav } from '@src/containers/bread-crumb-nav';
 import { logout, profile } from '@src/store/auth/slice';
 import { ModalProfile } from '../modal-profile';
 import { ThemeSwitcher } from '../theme-switcher';
+import Notification from '../notification';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -51,20 +52,23 @@ export const MainHeader = () => {
 
         <Flex align="center" gap={16}>
           <ThemeSwitcher />
+          <Flex align="center" gap={8}>
+            <Notification />
 
-          {user ? (
-            <Flex align="center" gap={8} className="cursor-pointer">
-              <Avatar src={user.image || undefined} alt="avatar" icon={<UserOutlined />} />
-              <Dropdown menu={{ items }} trigger={['click']}>
-                <Space>
-                  {user?.email}
-                  <DownOutlined />
-                </Space>
-              </Dropdown>
-            </Flex>
-          ) : (
-            <Link to={ROUTES.login}>Войти</Link>
-          )}
+            {user ? (
+              <Flex align="center" gap={8} className="cursor-pointer">
+                <Avatar src={user.image || undefined} alt="avatar" icon={<UserOutlined />} />
+                <Dropdown menu={{ items }} trigger={['click']}>
+                  <Space>
+                    {user?.email}
+                    <DownOutlined />
+                  </Space>
+                </Dropdown>
+              </Flex>
+            ) : (
+              <Link to={ROUTES.login}>Войти</Link>
+            )}
+          </Flex>
         </Flex>
 
         <ModalProfile isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} onLogout={onLogout} />
